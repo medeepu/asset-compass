@@ -90,3 +90,51 @@ export interface AnomalyDetail {
   confidence: number;
   timestamp: string;
 }
+
+export interface ApplicationData {
+  id: string;
+  name: string;
+  category: string;
+  bytes: number;
+  packets: number;
+  sessions: number;
+  risk: 'low' | 'medium' | 'high';
+}
+
+export interface ConversationData {
+  id: string;
+  sourceIp: string;
+  destIp: string;
+  application: string;
+  duration: string;
+  bytesIn: number;
+  bytesOut: number;
+  startTime: string;
+}
+
+export interface QoSData {
+  id: string;
+  application: string;
+  latency: number;
+  jitter: number;
+  packetLoss: number;
+  mos: number;
+}
+
+export interface TimelineEvent {
+  id: string;
+  type: 'network' | 'security' | 'config' | 'identity';
+  title: string;
+  description: string;
+  timestamp: string;
+  severity?: 'info' | 'warning' | 'error';
+}
+
+export interface ChangeHistoryItem {
+  id: string;
+  changeType: 'os' | 'app' | 'behavior' | 'config';
+  description: string;
+  oldValue?: string;
+  newValue?: string;
+  timestamp: string;
+}
