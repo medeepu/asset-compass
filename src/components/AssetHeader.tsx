@@ -1,6 +1,5 @@
 import { Asset } from "@/types/asset";
 import { ScoreBadge } from "./ScoreBadge";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Server, Monitor, Shield, Wifi, ChevronDown, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -13,7 +12,21 @@ import {
 
 interface AssetHeaderProps {
   asset: Asset;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
+
+const tabs = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'traffic', label: 'Traffic' },
+  { id: 'application', label: 'Application' },
+  { id: 'source', label: 'Source' },
+  { id: 'destination', label: 'Destination' },
+  { id: 'qos', label: 'QoS' },
+  { id: 'conversation', label: 'Conversation' },
+  { id: 'events', label: 'Events', count: 347 },
+  { id: 'timeline', label: 'Timeline' },
+];
 
 const getDeviceIcon = (deviceType: string) => {
   switch (deviceType.toLowerCase()) {
@@ -30,9 +43,7 @@ const getDeviceIcon = (deviceType: string) => {
   }
 };
 
-export const AssetHeader = ({ asset }: AssetHeaderProps) => {
-  const DeviceIcon = getDeviceIcon(asset.deviceType);
-  
+export const AssetHeader = ({ asset, activeTab, onTabChange }: AssetHeaderProps) => {
   return (
     <div className="bg-card border-b border-border px-6 py-4">
       <div className="flex items-start justify-between">
@@ -88,17 +99,19 @@ export const AssetHeader = ({ asset }: AssetHeaderProps) => {
 
       {/* Navigation Tabs */}
       <div className="flex items-center gap-1 mt-4 -mb-4 border-b border-transparent">
-        {['Overview', 'Traffic', 'Application', 'Source', 'Destination', 'QoS', 'Conversation', 'Events (347)', 'Timeline'].map((tab, index) => (
+        {tabs.map((tab) => (
           <button
-            key={tab}
+            key={tab.id}
+            onClick={() => onTabChange(tab.id)}
             className={cn(
               'px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-[1px]',
-              index === 0
+              activeTab === tab.id
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground border-transparent hover:text-foreground hover:border-muted'
             )}
           >
-            {tab}
+            {tab.label}
+            {tab.count && <span className="ml-1 text-xs">({tab.count})</span>}
           </button>
         ))}
       </div>

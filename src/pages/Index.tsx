@@ -9,7 +9,12 @@ import {
   mockPeers, 
   mockMitreCategories,
   mockProtocolBreakdown,
-  mockAnomalies 
+  mockAnomalies,
+  mockApplications,
+  mockConversations,
+  mockQoSData,
+  mockTimelineEvents,
+  mockChangeHistory,
 } from "@/data/mockData";
 
 const Index = () => {
@@ -25,7 +30,7 @@ const Index = () => {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - Asset List */}
-        <div className="w-72 flex-shrink-0">
+        <div className="w-80 flex-shrink-0 border-r border-border">
           <AssetListPanel
             assets={mockAssets}
             selectedAssetId={selectedAssetId}
@@ -42,6 +47,11 @@ const Index = () => {
           flows={mockFlows}
           protocols={mockProtocolBreakdown}
           anomalies={mockAnomalies}
+          applications={mockApplications}
+          conversations={mockConversations}
+          qosData={mockQoSData}
+          timelineEvents={mockTimelineEvents}
+          changeHistory={mockChangeHistory}
         />
       </div>
     </div>

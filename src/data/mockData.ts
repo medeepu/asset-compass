@@ -1,4 +1,4 @@
-import { Asset, FlowData, ThreatEvent, Peer, MitreCategory, ProtocolBreakdown, AnomalyDetail } from '@/types/asset';
+import { Asset, FlowData, ThreatEvent, Peer, MitreCategory, ProtocolBreakdown, AnomalyDetail, ApplicationData, ConversationData, QoSData, TimelineEvent, ChangeHistoryItem } from '@/types/asset';
 
 export const mockAssets: Asset[] = [
   {
@@ -270,4 +270,50 @@ export const mockAnomalies: AnomalyDetail[] = [
   { id: '2', type: 'Connection Pattern', description: 'New connection to previously unseen external IP', confidence: 92, timestamp: '2022-01-21 18:35:00' },
   { id: '3', type: 'Protocol Anomaly', description: 'HTTP traffic on non-standard port', confidence: 78, timestamp: '2022-01-21 18:25:00' },
   { id: '4', type: 'Timing Pattern', description: 'Regular interval beaconing detected', confidence: 95, timestamp: '2022-01-21 18:15:00' },
+];
+
+export const mockApplications: ApplicationData[] = [
+  { id: '1', name: 'HTTPS', category: 'Web', bytes: 15240000, packets: 12500, sessions: 45, risk: 'low' },
+  { id: '2', name: 'SSH', category: 'Remote Access', bytes: 2560000, packets: 1800, sessions: 12, risk: 'medium' },
+  { id: '3', name: 'DNS', category: 'Network Services', bytes: 450000, packets: 4500, sessions: 890, risk: 'low' },
+  { id: '4', name: 'SMB', category: 'File Sharing', bytes: 8920000, packets: 7200, sessions: 23, risk: 'medium' },
+  { id: '5', name: 'RDP', category: 'Remote Access', bytes: 12500000, packets: 9800, sessions: 8, risk: 'high' },
+  { id: '6', name: 'HTTP', category: 'Web', bytes: 1250000, packets: 950, sessions: 15, risk: 'low' },
+  { id: '7', name: 'Syslog', category: 'Network Services', bytes: 780000, packets: 6200, sessions: 1, risk: 'low' },
+  { id: '8', name: 'Unknown-8443', category: 'Unknown', bytes: 340000, packets: 280, sessions: 3, risk: 'high' },
+];
+
+export const mockConversations: ConversationData[] = [
+  { id: '1', sourceIp: '207.83.187.31', destIp: '10.0.0.50', application: 'HTTPS', duration: '00:45:23', bytesIn: 1524000, bytesOut: 892000, startTime: '2022-01-21 18:10:00' },
+  { id: '2', sourceIp: '192.168.1.100', destIp: '207.83.187.31', application: 'SSH', duration: '01:12:45', bytesIn: 256000, bytesOut: 128000, startTime: '2022-01-21 17:45:00' },
+  { id: '3', sourceIp: '207.83.187.31', destIp: '8.8.8.8', application: 'DNS', duration: '00:00:02', bytesIn: 4500, bytesOut: 2100, startTime: '2022-01-21 18:54:00' },
+  { id: '4', sourceIp: '172.16.0.25', destIp: '207.83.187.31', application: 'SMB', duration: '00:23:15', bytesIn: 892000, bytesOut: 1250000, startTime: '2022-01-21 18:30:00' },
+  { id: '5', sourceIp: '10.10.10.1', destIp: '207.83.187.31', application: 'RDP', duration: '02:15:30', bytesIn: 1250000, bytesOut: 2500000, startTime: '2022-01-21 16:40:00' },
+];
+
+export const mockQoSData: QoSData[] = [
+  { id: '1', application: 'HTTPS', latency: 12, jitter: 2, packetLoss: 0.01, mos: 4.4 },
+  { id: '2', application: 'SSH', latency: 8, jitter: 1, packetLoss: 0.0, mos: 4.5 },
+  { id: '3', application: 'RDP', latency: 45, jitter: 8, packetLoss: 0.5, mos: 3.8 },
+  { id: '4', application: 'VoIP', latency: 15, jitter: 3, packetLoss: 0.02, mos: 4.2 },
+  { id: '5', application: 'Video', latency: 25, jitter: 5, packetLoss: 0.1, mos: 4.0 },
+];
+
+export const mockTimelineEvents: TimelineEvent[] = [
+  { id: '1', type: 'security', title: 'Executable Binary Transfer', description: 'Suspicious executable detected', timestamp: '2022-01-21 18:45:00', severity: 'error' },
+  { id: '2', type: 'network', title: 'New Connection Established', description: 'Connection to 185.143.223.47', timestamp: '2022-01-21 18:35:00', severity: 'warning' },
+  { id: '3', type: 'config', title: 'Configuration Change', description: 'Firewall rule modified', timestamp: '2022-01-21 18:20:00', severity: 'info' },
+  { id: '4', type: 'security', title: 'Privilege Escalation', description: 'Service exploitation detected', timestamp: '2022-01-21 18:15:00', severity: 'error' },
+  { id: '5', type: 'identity', title: 'IP Address Changed', description: 'From 116.238.66.63 to 207.83.187.31', timestamp: '2022-01-21 17:58:00', severity: 'info' },
+  { id: '6', type: 'network', title: 'Bandwidth Spike', description: 'Outbound traffic exceeded threshold', timestamp: '2022-01-21 17:45:00', severity: 'warning' },
+  { id: '7', type: 'security', title: 'DNS Tunnel Detected', description: 'Abnormal DNS patterns', timestamp: '2022-01-21 17:30:00', severity: 'error' },
+  { id: '8', type: 'config', title: 'Service Started', description: 'New service "WMI Provider" started', timestamp: '2022-01-21 17:15:00', severity: 'info' },
+];
+
+export const mockChangeHistory: ChangeHistoryItem[] = [
+  { id: '1', changeType: 'os', description: 'Operating System Update', oldValue: 'Windows Server 2019 (Build 17763)', newValue: 'Windows Server 2019 (Build 17763.2366)', timestamp: '2022-01-20 03:00:00' },
+  { id: '2', changeType: 'app', description: 'New Application Detected', newValue: 'Chrome Browser v97.0.4692', timestamp: '2022-01-19 14:30:00' },
+  { id: '3', changeType: 'behavior', description: 'Traffic Pattern Change', oldValue: 'Normal business hours activity', newValue: 'After-hours outbound connections', timestamp: '2022-01-21 22:15:00' },
+  { id: '4', changeType: 'config', description: 'Firewall Rule Added', newValue: 'Allow outbound TCP 8443', timestamp: '2022-01-18 09:45:00' },
+  { id: '5', changeType: 'app', description: 'Application Removed', oldValue: 'Legacy FTP Client v2.1', timestamp: '2022-01-17 11:00:00' },
 ];
