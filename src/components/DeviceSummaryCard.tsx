@@ -1,6 +1,6 @@
 import { Asset } from "@/types/asset";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, Info, Network, Server, MapPin, Clock } from "lucide-react";
+import { ChevronDown, ChevronUp, Info, Network, Server, MapPin, Clock, Wifi, Cable } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -136,12 +136,12 @@ export const DeviceSummaryCard = ({ asset }: DeviceSummaryCardProps) => {
           <InfoRow label="Role" value={asset.roleTag} tooltip="Assigned role based on traffic patterns" />
         </div>
 
-        {/* NMS/IPAM Section */}
-        {(asset.connectedSwitch || asset.vlan || asset.subnet) && (
+        {/* Network Infrastructure Section - Wired */}
+        {asset.connectionType === 'wired' && (asset.connectedSwitch || asset.vlan || asset.subnet) && (
           <div className="pt-3 border-t border-border">
             <div className="flex items-center gap-2 mb-2">
-              <Network className="h-3.5 w-3.5 text-primary" />
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Network Infrastructure</span>
+              <Cable className="h-3.5 w-3.5 text-primary" />
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Wired Connection</span>
             </div>
             <div className="space-y-0 bg-secondary/30 rounded-lg p-2">
               {asset.connectedSwitch && (
@@ -152,6 +152,89 @@ export const DeviceSummaryCard = ({ asset }: DeviceSummaryCardProps) => {
               )}
               {asset.vlan && (
                 <InfoRow label="VLAN" value={asset.vlan} tooltip="VLAN assignment from switch" />
+              )}
+              {asset.subnet && (
+                <InfoRow label="Subnet" value={asset.subnet} tooltip="IP subnet from IPAM" />
+              )}
+              {asset.gateway && (
+                <InfoRow label="Gateway" value={asset.gateway} tooltip="Default gateway" />
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Network Infrastructure Section - Wireless */}
+        {asset.connectionType === 'wireless' && (
+          <div className="pt-3 border-t border-border">
+            <div className="flex items-center gap-2 mb-2">
+              <Wifi className="h-3.5 w-3.5 text-primary" />
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Wireless Connection</span>
+            </div>
+            <div className="space-y-0 bg-secondary/30 rounded-lg p-2">
+              {asset.ssid && (
+                <InfoRow label="SSID" value={asset.ssid} tooltip="Wireless network name" />
+              )}
+              {asset.accessPoint && (
+                <InfoRow 
+                  label="Access Point" 
+                  value={
+                    <div className="text-right">
+                      <div>{asset.accessPoint}</div>
+                      {asset.accessPointMac && (
+                        <div className="text-[10px] font-mono text-muted-foreground">{asset.accessPointMac}</div>
+                      )}
+                    </div>
+                  } 
+                  tooltip="Connected access point name and MAC address" 
+                />
+              )}
+              {asset.frequency && (
+                <InfoRow 
+                  label="Frequency" 
+                  value={`${asset.frequency} (Ch ${asset.channel})`} 
+                  tooltip="Wireless frequency band and channel" 
+                />
+              )}
+              {asset.signalStrength !== undefined && (
+                <InfoRow 
+                  label="Signal" 
+                  value={
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((bar) => (
+                          <div 
+                            key={bar} 
+                            className={cn(
+                              "w-1 rounded-sm",
+                              bar === 1 ? "h-1" : bar === 2 ? "h-2" : bar === 3 ? "h-3" : bar === 4 ? "h-3.5" : "h-4",
+                              asset.signalStrength! >= -50 ? (bar <= 5 ? "bg-success" : "bg-muted") :
+                              asset.signalStrength! >= -60 ? (bar <= 4 ? "bg-success" : "bg-muted") :
+                              asset.signalStrength! >= -70 ? (bar <= 3 ? "bg-warning" : "bg-muted") :
+                              asset.signalStrength! >= -80 ? (bar <= 2 ? "bg-destructive" : "bg-muted") :
+                              (bar <= 1 ? "bg-destructive" : "bg-muted")
+                            )}
+                          />
+                        ))}
+                      </div>
+                      <span>{asset.signalStrength} dBm</span>
+                    </div>
+                  } 
+                  tooltip={`Signal strength: ${asset.signalStrength} dBm${asset.snr ? `, SNR: ${asset.snr} dB` : ''}`} 
+                />
+              )}
+              {asset.authMethod && (
+                <InfoRow 
+                  label="Security" 
+                  value={
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-success/10 text-success border-success/30">
+                      {asset.authMethod}
+                    </Badge>
+                  } 
+                  tooltip={`Authentication: ${asset.authMethod}${asset.encryptionType ? `, Encryption: ${asset.encryptionType}` : ''}`} 
+                />
+              )}
+              {asset.vlan && (
+                <InfoRow label="VLAN" value={asset.vlan} tooltip="VLAN assignment" />
               )}
               {asset.subnet && (
                 <InfoRow label="Subnet" value={asset.subnet} tooltip="IP subnet from IPAM" />
