@@ -22,6 +22,7 @@ export interface Asset {
   macHistory: HistoryItem[];
   managementTools: string[];
   // NMS/IPAM Integration
+  connectionType: 'wired' | 'wireless' | 'unknown';
   connectedSwitch?: string;
   switchPort?: string;
   vlan?: string;
@@ -29,6 +30,17 @@ export interface Asset {
   dhcpServer?: string;
   dnsServer?: string;
   gateway?: string;
+  // Wireless specific
+  ssid?: string;
+  accessPoint?: string;
+  accessPointMac?: string;
+  channel?: number;
+  frequency?: string;
+  signalStrength?: number;
+  noiseLevel?: number;
+  snr?: number;
+  authMethod?: string;
+  encryptionType?: string;
   // Tags and Comments
   tags?: string[];
   comments?: AssetComment[];
