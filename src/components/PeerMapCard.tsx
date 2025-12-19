@@ -1,6 +1,7 @@
 import { Peer } from "@/types/asset";
-import { Monitor, Globe, Server, Database, Users, Laptop } from "lucide-react";
+import { Monitor, Globe, Server, Database, Users, Laptop, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface PeerMapCardProps {
   peers: Peer[];
@@ -21,7 +22,19 @@ export const PeerMapCard = ({ peers, assetName }: PeerMapCardProps) => {
 
   return (
     <div className="panel-card">
-      <h3 className="section-title">Peers</h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="section-title mb-0">Network Peers</h3>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button className="text-muted-foreground hover:text-foreground">
+              <Info className="h-4 w-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="left" className="max-w-xs">
+            <p className="text-xs">Network communication peers detected in the last 24 hours based on flow data</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
       
       <div className="relative min-h-[300px]">
         {/* Left side - Categories */}

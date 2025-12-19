@@ -1,6 +1,7 @@
 import { AnomalyDetail } from "@/types/asset";
 import { cn } from "@/lib/utils";
-import { Activity, Zap, Network, Timer } from "lucide-react";
+import { Activity, Zap, Network, Timer, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AnomalyDetailsCardProps {
   anomalies: AnomalyDetail[];
@@ -16,7 +17,19 @@ const getAnomalyIcon = (type: string) => {
 export const AnomalyDetailsCard = ({ anomalies }: AnomalyDetailsCardProps) => {
   return (
     <div className="panel-card">
-      <h3 className="section-title">Anomaly Details</h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="section-title mb-0">Anomaly Detection</h3>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button className="text-muted-foreground hover:text-foreground">
+              <Info className="h-4 w-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="left" className="max-w-xs">
+            <p className="text-xs">Behavioral anomalies detected using ML models over the last 7 days compared to 30-day baseline</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
       
       <div className="space-y-3">
         {anomalies.map((anomaly) => {

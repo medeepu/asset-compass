@@ -1,7 +1,8 @@
 import { Asset } from "@/types/asset";
 import { DataTag } from "./DataTag";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface DeviceSummaryCardProps {
   asset: Asset;
@@ -10,7 +11,19 @@ interface DeviceSummaryCardProps {
 export const DeviceSummaryCard = ({ asset }: DeviceSummaryCardProps) => {
   return (
     <div className="panel-card">
-      <h3 className="section-title">Device Summary</h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="section-title mb-0">Device Summary</h3>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button className="text-muted-foreground hover:text-foreground">
+              <Info className="h-4 w-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="left" className="max-w-xs">
+            <p className="text-xs">Device identification and network configuration details. Historical data shows changes over time.</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
       
       <div className="space-y-4">
         {/* Host IP */}

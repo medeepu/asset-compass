@@ -10,9 +10,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, Download, ArrowUpDown } from "lucide-react";
+import { Search, Filter, Download, ArrowUpDown, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface FlowsTableProps {
   flows: FlowData[];
@@ -36,7 +37,19 @@ export const FlowsTable = ({ flows }: FlowsTableProps) => {
   return (
     <div className="panel-card">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="section-title mb-0">Flow Analytics</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="section-title mb-0">Network Flow Analytics</h3>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className="text-muted-foreground hover:text-foreground">
+                <Info className="h-4 w-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="max-w-xs">
+              <p className="text-xs">NetFlow records captured over the last 1 hour showing source/destination communication patterns</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

@@ -53,24 +53,26 @@ export const OverviewTab = ({
         </div>
       </div>
 
-      {/* Row 2: Peer Map, Threat Events, Anomalies & MITRE */}
+      {/* Row 2: Threat Events, Anomalies, Peer Map & MITRE */}
       <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-4">
-          <PeerMapCard peers={peers} assetName={asset.name} />
-        </div>
         <div className="col-span-4">
           <ThreatEventsList events={events.slice(0, 5)} />
         </div>
         <div className="col-span-4">
-          <div className="space-y-4">
-            <AnomalyDetailsCard anomalies={anomalies} />
+          <div className="space-y-4 h-full flex flex-col">
+            <div className="flex-1">
+              <AnomalyDetailsCard anomalies={anomalies} />
+            </div>
             <ChangeHistoryCard changes={changeHistory} />
           </div>
         </div>
+        <div className="col-span-4">
+          <MitreAttackCard categories={mitreCategories} totalEvents={27} />
+        </div>
       </div>
 
-      {/* Row 3: MITRE ATT&CK */}
-      <MitreAttackCard categories={mitreCategories} totalEvents={27} />
+      {/* Row 3: Peer Map */}
+      <PeerMapCard peers={peers} assetName={asset.name} />
 
       {/* Row 4: Flows Table */}
       <FlowsTable flows={flows} />

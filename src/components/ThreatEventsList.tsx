@@ -1,7 +1,8 @@
 import { ThreatEvent } from "@/types/asset";
 import { ThreatBadge } from "./ThreatBadge";
-import { AlertTriangle, Clock, Shield } from "lucide-react";
+import { AlertTriangle, Clock, Shield, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ThreatEventsListProps {
   events: ThreatEvent[];
@@ -10,7 +11,19 @@ interface ThreatEventsListProps {
 export const ThreatEventsList = ({ events }: ThreatEventsListProps) => {
   return (
     <div className="panel-card">
-      <h3 className="section-title">Active Threat Events</h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="section-title mb-0">Active Threat Events</h3>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button className="text-muted-foreground hover:text-foreground">
+              <Info className="h-4 w-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="left" className="max-w-xs">
+            <p className="text-xs">Most recent security events detected on this asset in the last 24 hours</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
       
       <div className="space-y-2">
         {events.slice(0, 5).map((event) => (
