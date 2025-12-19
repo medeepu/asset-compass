@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Asset, ThreatEvent, Peer, MitreCategory, FlowData, ProtocolBreakdown, AnomalyDetail, ApplicationData, ConversationData, QoSData, TimelineEvent, ChangeHistoryItem } from "@/types/asset";
+import { Asset, ThreatEvent, Peer, MitreCategory, FlowData, ProtocolBreakdown, AnomalyDetail, ApplicationData, ConversationData, QoSData, TimelineEvent, ChangeHistoryItem, NetworkBehavior } from "@/types/asset";
 import { AssetHeader } from "./AssetHeader";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { OverviewTab } from "./tabs/OverviewTab";
@@ -10,6 +10,7 @@ import { QoSTab } from "./tabs/QoSTab";
 import { ConversationTab } from "./tabs/ConversationTab";
 import { EventsTab } from "./tabs/EventsTab";
 import { TimelineTab } from "./tabs/TimelineTab";
+import { CommentsTab } from "./CommentsTab";
 
 interface AssetDetailPanelProps {
   asset: Asset;
@@ -24,6 +25,7 @@ interface AssetDetailPanelProps {
   qosData: QoSData[];
   timelineEvents: TimelineEvent[];
   changeHistory: ChangeHistoryItem[];
+  networkBehavior: NetworkBehavior;
 }
 
 export const AssetDetailPanel = ({
@@ -39,6 +41,7 @@ export const AssetDetailPanel = ({
   qosData,
   timelineEvents,
   changeHistory,
+  networkBehavior,
 }: AssetDetailPanelProps) => {
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -55,6 +58,9 @@ export const AssetDetailPanel = ({
             protocols={protocols}
             anomalies={anomalies}
             changeHistory={changeHistory}
+            applications={applications}
+            conversations={conversations}
+            networkBehavior={networkBehavior}
           />
         );
       case 'traffic':
@@ -73,6 +79,8 @@ export const AssetDetailPanel = ({
         return <EventsTab events={events} mitreCategories={mitreCategories} />;
       case 'timeline':
         return <TimelineTab timelineEvents={timelineEvents} changeHistory={changeHistory} />;
+      case 'comments':
+        return <CommentsTab asset={asset} />;
       default:
         return (
           <OverviewTab
@@ -84,6 +92,9 @@ export const AssetDetailPanel = ({
             protocols={protocols}
             anomalies={anomalies}
             changeHistory={changeHistory}
+            applications={applications}
+            conversations={conversations}
+            networkBehavior={networkBehavior}
           />
         );
     }
@@ -91,10 +102,7 @@ export const AssetDetailPanel = ({
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-background">
-      {/* Asset Header with Tabs */}
       <AssetHeader asset={asset} activeTab={activeTab} onTabChange={setActiveTab} />
-
-      {/* Scrollable Content */}
       <ScrollArea className="flex-1">
         <div className="p-6">
           {renderTabContent()}

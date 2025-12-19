@@ -1,14 +1,13 @@
-import { Asset, ThreatEvent, Peer, MitreCategory, FlowData, ProtocolBreakdown, AnomalyDetail, ChangeHistoryItem } from "@/types/asset";
+import { Asset, ThreatEvent, Peer, MitreCategory, FlowData, ProtocolBreakdown, AnomalyDetail, ChangeHistoryItem, ApplicationData, ConversationData, NetworkBehavior } from "@/types/asset";
 import { DeviceSummaryCard } from "../DeviceSummaryCard";
-import { TrafficCard } from "../TrafficCard";
-import { EventsSummaryCard } from "../EventsSummaryCard";
-import { MitreAttackCard } from "../MitreAttackCard";
-import { PeerMapCard } from "../PeerMapCard";
-import { ThreatEventsList } from "../ThreatEventsList";
-import { AnomalyDetailsCard } from "../AnomalyDetailsCard";
-import { ProtocolBreakdownCard } from "../ProtocolBreakdownCard";
+import { NetworkBehaviorCard } from "../NetworkBehaviorCard";
+import { DetectionAlertsCard } from "../DetectionAlertsCard";
+import { PeerSummaryCard } from "../PeerSummaryCard";
+import { ApplicationHighlightsCard } from "../ApplicationHighlightsCard";
+import { MitreSummaryCard } from "../MitreSummaryCard";
 import { ScoreCards } from "../ScoreCards";
 import { ChangeHistoryCard } from "../ChangeHistoryCard";
+import { PeerMapCard } from "../PeerMapCard";
 import { FlowsTable } from "../FlowsTable";
 
 interface OverviewTabProps {
@@ -20,54 +19,53 @@ interface OverviewTabProps {
   protocols: ProtocolBreakdown;
   anomalies: AnomalyDetail[];
   changeHistory: ChangeHistoryItem[];
+  applications: ApplicationData[];
+  conversations: ConversationData[];
+  networkBehavior: NetworkBehavior;
 }
 
 export const OverviewTab = ({
   asset,
-  events,
   peers,
   mitreCategories,
   flows,
-  protocols,
   anomalies,
   changeHistory,
+  applications,
+  conversations,
+  networkBehavior,
 }: OverviewTabProps) => {
   return (
     <div className="space-y-6">
-      {/* Row 1: Device Summary, Scores & Traffic */}
+      {/* Row 1: Asset Identity, Network Behavior, Risk Scores */}
       <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-5">
+        <div className="col-span-4">
           <DeviceSummaryCard asset={asset} />
-        </div>
-        <div className="col-span-3">
-          <div className="space-y-4">
-            <ScoreCards asset={asset} />
-            <TrafficCard inbound={4532} outbound={5421} />
-          </div>
         </div>
         <div className="col-span-4">
           <div className="space-y-4">
-            <EventsSummaryCard events={events} />
-            <ProtocolBreakdownCard protocols={protocols} />
+            <ScoreCards asset={asset} />
+            <NetworkBehaviorCard behavior={networkBehavior} />
           </div>
+        </div>
+        <div className="col-span-4">
+          <DetectionAlertsCard anomalies={anomalies} />
         </div>
       </div>
 
-      {/* Row 2: Threat Events, Anomalies, Peer Map & MITRE */}
+      {/* Row 2: Peer Context, Application Highlights, MITRE Summary */}
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-4">
-          <ThreatEventsList events={events.slice(0, 5)} />
+          <PeerSummaryCard peers={peers} />
         </div>
         <div className="col-span-4">
-          <div className="space-y-4 h-full flex flex-col">
-            <div className="flex-1">
-              <AnomalyDetailsCard anomalies={anomalies} />
-            </div>
+          <ApplicationHighlightsCard applications={applications} conversations={conversations} />
+        </div>
+        <div className="col-span-4">
+          <div className="space-y-4">
+            <MitreSummaryCard categories={mitreCategories} totalEvents={27} />
             <ChangeHistoryCard changes={changeHistory} />
           </div>
-        </div>
-        <div className="col-span-4">
-          <MitreAttackCard categories={mitreCategories} totalEvents={27} />
         </div>
       </div>
 
