@@ -21,6 +21,24 @@ export interface Asset {
   hostnameHistory: HistoryItem[];
   macHistory: HistoryItem[];
   managementTools: string[];
+  // NMS/IPAM Integration
+  connectedSwitch?: string;
+  switchPort?: string;
+  vlan?: string;
+  subnet?: string;
+  dhcpServer?: string;
+  dnsServer?: string;
+  gateway?: string;
+  // Tags and Comments
+  tags?: string[];
+  comments?: AssetComment[];
+}
+
+export interface AssetComment {
+  id: string;
+  author: string;
+  content: string;
+  timestamp: string;
 }
 
 export interface HistoryItem {
@@ -33,6 +51,7 @@ export interface TrafficStats {
   inbound: number;
   outbound: number;
   unit: string;
+  changePercent?: number;
 }
 
 export interface FlowData {
@@ -67,6 +86,7 @@ export interface Peer {
   type: 'internal' | 'external';
   category: string;
   connectionCount: number;
+  isNew?: boolean;
 }
 
 export interface MitreCategory {
@@ -89,6 +109,8 @@ export interface AnomalyDetail {
   description: string;
   confidence: number;
   timestamp: string;
+  mitreId?: string;
+  mitreCategory?: string;
 }
 
 export interface ApplicationData {
@@ -123,7 +145,7 @@ export interface QoSData {
 
 export interface TimelineEvent {
   id: string;
-  type: 'network' | 'security' | 'config' | 'identity';
+  type: 'network' | 'security' | 'identity' | 'peer';
   title: string;
   description: string;
   timestamp: string;
@@ -132,9 +154,19 @@ export interface TimelineEvent {
 
 export interface ChangeHistoryItem {
   id: string;
-  changeType: 'os' | 'app' | 'behavior' | 'config';
+  changeType: 'ip' | 'mac' | 'hostname' | 'peer' | 'port' | 'vlan' | 'traffic';
   description: string;
   oldValue?: string;
   newValue?: string;
   timestamp: string;
+}
+
+export interface NetworkBehavior {
+  bandwidthToday: number;
+  bandwidthYesterday: number;
+  flowCountToday: number;
+  flowCountYesterday: number;
+  uniquePeersToday: number;
+  uniquePeersYesterday: number;
+  newPeersToday: number;
 }

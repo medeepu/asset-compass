@@ -1,4 +1,4 @@
-import { Asset, FlowData, ThreatEvent, Peer, MitreCategory, ProtocolBreakdown, AnomalyDetail, ApplicationData, ConversationData, QoSData, TimelineEvent, ChangeHistoryItem } from '@/types/asset';
+import { Asset, FlowData, ThreatEvent, Peer, MitreCategory, ProtocolBreakdown, AnomalyDetail, ApplicationData, ConversationData, QoSData, TimelineEvent, ChangeHistoryItem, NetworkBehavior } from '@/types/asset';
 
 export const mockAssets: Asset[] = [
   {
@@ -19,12 +19,28 @@ export const mockAssets: Asset[] = [
     category: 'workstation-149',
     location: 'FC 235',
     network: 'Internal',
-    interfaceType: 'Others',
+    interfaceType: 'Ethernet',
+    // NMS/IPAM Integration
+    connectedSwitch: 'Catalyst-9300-DC1-Rack5',
+    switchPort: 'Gi1/0/24',
+    vlan: 'VLAN 100 (Server)',
+    subnet: '207.83.187.0/24',
+    dhcpServer: '10.0.0.5',
+    dnsServer: '10.0.0.10',
+    gateway: '207.83.187.1',
+    // Tags
+    tags: ['Critical Asset', 'PCI-DSS', 'Production'],
+    comments: [
+      { id: '1', author: 'John Mitchell', content: 'Primary domain controller for east campus', timestamp: '2022-01-20 10:30:00' },
+      { id: '2', author: 'Sarah Chen', content: 'Reviewed traffic anomaly - confirmed legitimate backup job', timestamp: '2022-01-21 14:15:00' },
+    ],
     ipHistory: [
       { value: '207.83.187.31', timestamp: '2022-01-21', isCurrent: true },
       { value: '116.238.66.63', timestamp: '2022-01-15', isCurrent: false },
       { value: '129.152.91.135', timestamp: '2022-01-10', isCurrent: false },
       { value: '145.2.123.63', timestamp: '2022-01-05', isCurrent: false },
+      { value: '192.168.1.100', timestamp: '2022-01-01', isCurrent: false },
+      { value: '10.0.50.25', timestamp: '2021-12-28', isCurrent: false },
     ],
     hostnameHistory: [
       { value: 'CentralServer-01', timestamp: '2022-01-21', isCurrent: true },
@@ -32,8 +48,6 @@ export const mockAssets: Asset[] = [
     macHistory: [
       { value: '00:1A:2B:3C:4D:5E', timestamp: '2022-01-21', isCurrent: true },
       { value: '08:00:27:AB:CD:EF', timestamp: '2022-01-15', isCurrent: false },
-      { value: '4A:6F:82:9D:E3:1B', timestamp: '2022-01-10', isCurrent: false },
-      { value: '52:8F:A4:7E:6D:3C', timestamp: '2022-01-05', isCurrent: false },
     ],
     managementTools: ['EDR', 'EndPoint Central'],
   },
@@ -56,6 +70,11 @@ export const mockAssets: Asset[] = [
     location: 'DC-1',
     network: 'Internal',
     interfaceType: 'Ethernet',
+    connectedSwitch: 'Core-Switch-01',
+    switchPort: 'Te1/0/1',
+    vlan: 'VLAN 1 (Management)',
+    subnet: '192.168.1.0/24',
+    tags: ['Network Core', 'Critical'],
     ipHistory: [{ value: '192.168.1.100', timestamp: '2021-11-15', isCurrent: true }],
     hostnameHistory: [{ value: 'catalyst-9000', timestamp: '2021-11-15', isCurrent: true }],
     macHistory: [{ value: '00:2B:3C:4D:5E:6F', timestamp: '2021-11-15', isCurrent: true }],
@@ -80,6 +99,7 @@ export const mockAssets: Asset[] = [
     location: 'DMZ',
     network: 'Perimeter',
     interfaceType: 'Fiber',
+    tags: ['Perimeter', 'Firewall'],
     ipHistory: [{ value: '10.0.0.50', timestamp: '2021-09-20', isCurrent: true }],
     hostnameHistory: [{ value: 'juniper-ex-01', timestamp: '2021-09-20', isCurrent: true }],
     macHistory: [{ value: '00:3C:4D:5E:6F:70', timestamp: '2021-09-20', isCurrent: true }],
@@ -104,6 +124,7 @@ export const mockAssets: Asset[] = [
     location: 'Floor 3',
     network: 'Internal',
     interfaceType: 'Ethernet',
+    tags: ['Wireless'],
     ipHistory: [{ value: '172.16.0.25', timestamp: '2021-12-01', isCurrent: true }],
     hostnameHistory: [{ value: 'aruba-5400r', timestamp: '2021-12-01', isCurrent: true }],
     macHistory: [{ value: '00:4D:5E:6F:70:81', timestamp: '2021-12-01', isCurrent: true }],
@@ -128,6 +149,7 @@ export const mockAssets: Asset[] = [
     location: 'NOC',
     network: 'DMZ',
     interfaceType: 'Fiber',
+    tags: ['Gateway', 'Internet'],
     ipHistory: [{ value: '10.10.10.1', timestamp: '2021-08-10', isCurrent: true }],
     hostnameHistory: [{ value: 'gateway-master', timestamp: '2021-08-10', isCurrent: true }],
     macHistory: [{ value: '00:5E:6F:70:81:92', timestamp: '2021-08-10', isCurrent: true }],
@@ -152,6 +174,7 @@ export const mockAssets: Asset[] = [
     location: 'NOC',
     network: 'Internal',
     interfaceType: 'Ethernet',
+    tags: ['Monitoring'],
     ipHistory: [{ value: '192.168.50.100', timestamp: '2021-10-05', isCurrent: true }],
     hostnameHistory: [{ value: 'liveflow-collector', timestamp: '2021-10-05', isCurrent: true }],
     macHistory: [{ value: '00:6F:70:81:92:A3', timestamp: '2021-10-05', isCurrent: true }],
@@ -176,6 +199,7 @@ export const mockAssets: Asset[] = [
     location: 'DC-2',
     network: 'Internal',
     interfaceType: 'Ethernet',
+    tags: ['Load Balancer'],
     ipHistory: [{ value: '10.20.30.40', timestamp: '2021-07-22', isCurrent: true }],
     hostnameHistory: [{ value: 'speedstream-01', timestamp: '2021-07-22', isCurrent: true }],
     macHistory: [{ value: '00:70:81:92:A3:B4', timestamp: '2021-07-22', isCurrent: true }],
@@ -200,6 +224,7 @@ export const mockAssets: Asset[] = [
     location: 'DC-1',
     network: 'SAN',
     interfaceType: 'FC',
+    tags: ['Storage'],
     ipHistory: [{ value: '172.20.0.15', timestamp: '2021-06-18', isCurrent: true }],
     hostnameHistory: [{ value: 'flashsync-storage', timestamp: '2021-06-18', isCurrent: true }],
     macHistory: [{ value: '00:81:92:A3:B4:C5', timestamp: '2021-06-18', isCurrent: true }],
@@ -231,13 +256,13 @@ export const mockThreatEvents: ThreatEvent[] = [
 
 export const mockPeers: Peer[] = [
   { id: '1', name: 'Domain Controller', ip: '10.0.0.10', location: 'Texas, US', type: 'internal', category: 'Domain Controller', connectionCount: 1250 },
-  { id: '2', name: 'Multicast', ip: '224.0.0.251', location: 'London, UK', type: 'external', category: 'Multicast', connectionCount: 890 },
+  { id: '2', name: 'Multicast', ip: '224.0.0.251', location: 'London, UK', type: 'external', category: 'Multicast', connectionCount: 890, isNew: true },
   { id: '3', name: 'Datacenter', ip: '172.16.0.1', location: 'Denmark', type: 'internal', category: 'Datacenter', connectionCount: 2100 },
   { id: '4', name: 'End User Device', ip: '192.168.1.50', location: 'Netherlands', type: 'internal', category: 'End User Devices', connectionCount: 450 },
   { id: '5', name: 'Sales Application', ip: '10.20.30.100', location: 'Scotland', type: 'internal', category: 'Sales and Marketing', connectionCount: 780 },
-  { id: '6', name: 'Desktop Pool', ip: '192.168.2.0', location: 'Moscow, Russia', type: 'internal', category: 'Desktops', connectionCount: 1500 },
+  { id: '6', name: 'Desktop Pool', ip: '192.168.2.0', location: 'Moscow, Russia', type: 'internal', category: 'Desktops', connectionCount: 1500, isNew: true },
   { id: '7', name: 'Database Server', ip: '172.20.0.50', location: 'Sydney', type: 'internal', category: 'Database Servers', connectionCount: 3200 },
-  { id: '8', name: 'External CDN', ip: '104.18.32.7', location: 'Singapore', type: 'external', category: 'Others (Internet)', connectionCount: 250 },
+  { id: '8', name: 'External CDN', ip: '104.18.32.7', location: 'Singapore', type: 'external', category: 'Others (Internet)', connectionCount: 250, isNew: true },
 ];
 
 export const mockMitreCategories: MitreCategory[] = [
@@ -266,10 +291,10 @@ export const mockProtocolBreakdown: ProtocolBreakdown = {
 };
 
 export const mockAnomalies: AnomalyDetail[] = [
-  { id: '1', type: 'Traffic Volume', description: 'Unusual spike in outbound traffic volume', confidence: 87, timestamp: '2022-01-21 18:40:00' },
-  { id: '2', type: 'Connection Pattern', description: 'New connection to previously unseen external IP', confidence: 92, timestamp: '2022-01-21 18:35:00' },
-  { id: '3', type: 'Protocol Anomaly', description: 'HTTP traffic on non-standard port', confidence: 78, timestamp: '2022-01-21 18:25:00' },
-  { id: '4', type: 'Timing Pattern', description: 'Regular interval beaconing detected', confidence: 95, timestamp: '2022-01-21 18:15:00' },
+  { id: '1', type: 'Traffic Volume Spike', description: 'Unusual spike in outbound traffic volume exceeding 3x baseline', confidence: 87, timestamp: '2022-01-21 18:40:00', mitreId: 'T1048', mitreCategory: 'Exfiltration' },
+  { id: '2', type: 'New External Connection', description: 'New connection to previously unseen external IP 185.143.223.47', confidence: 92, timestamp: '2022-01-21 18:35:00', mitreId: 'T1071', mitreCategory: 'Command and Control' },
+  { id: '3', type: 'Protocol Anomaly', description: 'HTTP traffic on non-standard port 8443', confidence: 78, timestamp: '2022-01-21 18:25:00', mitreId: 'T1571', mitreCategory: 'Command and Control' },
+  { id: '4', type: 'Beaconing Pattern', description: 'Regular 60-second interval communications detected', confidence: 95, timestamp: '2022-01-21 18:15:00', mitreId: 'T1071', mitreCategory: 'Command and Control' },
 ];
 
 export const mockApplications: ApplicationData[] = [
@@ -300,20 +325,31 @@ export const mockQoSData: QoSData[] = [
 ];
 
 export const mockTimelineEvents: TimelineEvent[] = [
-  { id: '1', type: 'security', title: 'Executable Binary Transfer', description: 'Suspicious executable detected', timestamp: '2022-01-21 18:45:00', severity: 'error' },
-  { id: '2', type: 'network', title: 'New Connection Established', description: 'Connection to 185.143.223.47', timestamp: '2022-01-21 18:35:00', severity: 'warning' },
-  { id: '3', type: 'config', title: 'Configuration Change', description: 'Firewall rule modified', timestamp: '2022-01-21 18:20:00', severity: 'info' },
-  { id: '4', type: 'security', title: 'Privilege Escalation', description: 'Service exploitation detected', timestamp: '2022-01-21 18:15:00', severity: 'error' },
-  { id: '5', type: 'identity', title: 'IP Address Changed', description: 'From 116.238.66.63 to 207.83.187.31', timestamp: '2022-01-21 17:58:00', severity: 'info' },
-  { id: '6', type: 'network', title: 'Bandwidth Spike', description: 'Outbound traffic exceeded threshold', timestamp: '2022-01-21 17:45:00', severity: 'warning' },
-  { id: '7', type: 'security', title: 'DNS Tunnel Detected', description: 'Abnormal DNS patterns', timestamp: '2022-01-21 17:30:00', severity: 'error' },
-  { id: '8', type: 'config', title: 'Service Started', description: 'New service "WMI Provider" started', timestamp: '2022-01-21 17:15:00', severity: 'info' },
+  { id: '1', type: 'security', title: 'Traffic Volume Spike Detected', description: 'Outbound traffic exceeded 3x baseline - potential exfiltration', timestamp: '2022-01-21 18:45:00', severity: 'error' },
+  { id: '2', type: 'peer', title: 'New External Peer Connection', description: 'First connection to 185.143.223.47 (Singapore)', timestamp: '2022-01-21 18:35:00', severity: 'warning' },
+  { id: '3', type: 'network', title: 'Port Scan Detected', description: 'Sequential port access pattern from 10.0.0.50', timestamp: '2022-01-21 18:20:00', severity: 'warning' },
+  { id: '4', type: 'security', title: 'Beaconing Pattern Identified', description: '60-second interval communications to external host', timestamp: '2022-01-21 18:15:00', severity: 'error' },
+  { id: '5', type: 'identity', title: 'IP Address Changed', description: 'From 116.238.66.63 to 207.83.187.31 via DHCP', timestamp: '2022-01-21 17:58:00', severity: 'info' },
+  { id: '6', type: 'network', title: 'Bandwidth Threshold Exceeded', description: 'Outbound traffic exceeded 500MB/hour threshold', timestamp: '2022-01-21 17:45:00', severity: 'warning' },
+  { id: '7', type: 'peer', title: 'New Internal Peer', description: 'First connection to Desktop Pool (192.168.2.0)', timestamp: '2022-01-21 17:30:00', severity: 'info' },
 ];
 
+// Network-trackable change history (removed OS/app changes as they can't be tracked via packets)
 export const mockChangeHistory: ChangeHistoryItem[] = [
-  { id: '1', changeType: 'os', description: 'Operating System Update', oldValue: 'Windows Server 2019 (Build 17763)', newValue: 'Windows Server 2019 (Build 17763.2366)', timestamp: '2022-01-20 03:00:00' },
-  { id: '2', changeType: 'app', description: 'New Application Detected', newValue: 'Chrome Browser v97.0.4692', timestamp: '2022-01-19 14:30:00' },
-  { id: '3', changeType: 'behavior', description: 'Traffic Pattern Change', oldValue: 'Normal business hours activity', newValue: 'After-hours outbound connections', timestamp: '2022-01-21 22:15:00' },
-  { id: '4', changeType: 'config', description: 'Firewall Rule Added', newValue: 'Allow outbound TCP 8443', timestamp: '2022-01-18 09:45:00' },
-  { id: '5', changeType: 'app', description: 'Application Removed', oldValue: 'Legacy FTP Client v2.1', timestamp: '2022-01-17 11:00:00' },
+  { id: '1', changeType: 'ip', description: 'IP Address Changed', oldValue: '116.238.66.63', newValue: '207.83.187.31', timestamp: '2022-01-21 17:58:00' },
+  { id: '2', changeType: 'peer', description: 'New External Peer Detected', newValue: '185.143.223.47 (Singapore)', timestamp: '2022-01-21 18:35:00' },
+  { id: '3', changeType: 'traffic', description: 'Traffic Pattern Shift', oldValue: 'Normal business hours', newValue: 'After-hours activity detected', timestamp: '2022-01-21 22:15:00' },
+  { id: '4', changeType: 'port', description: 'New Port Activity', newValue: 'TCP 8443 (outbound)', timestamp: '2022-01-21 18:25:00' },
+  { id: '5', changeType: 'vlan', description: 'VLAN Assignment Changed', oldValue: 'VLAN 50 (Guest)', newValue: 'VLAN 100 (Server)', timestamp: '2022-01-20 09:00:00' },
+  { id: '6', changeType: 'mac', description: 'MAC Address Changed', oldValue: '08:00:27:AB:CD:EF', newValue: '00:1A:2B:3C:4D:5E', timestamp: '2022-01-15 14:30:00' },
 ];
+
+export const mockNetworkBehavior: NetworkBehavior = {
+  bandwidthToday: 9953,
+  bandwidthYesterday: 8432,
+  flowCountToday: 12450,
+  flowCountYesterday: 11200,
+  uniquePeersToday: 47,
+  uniquePeersYesterday: 42,
+  newPeersToday: 3,
+};

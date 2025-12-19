@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, Network, Shield, Settings, User, ArrowRight } from "lucide-react";
+import { Search, Filter, Network, Shield, User, Users, ArrowRight, Info } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TimelineTabProps {
   timelineEvents: TimelineEvent[];
@@ -18,8 +19,8 @@ const getEventIcon = (type: string) => {
       return Network;
     case 'security':
       return Shield;
-    case 'config':
-      return Settings;
+    case 'peer':
+      return Users;
     case 'identity':
       return User;
     default:
@@ -35,12 +36,33 @@ const getEventColor = (type: string, severity?: string) => {
       return 'text-destructive bg-destructive/10';
     case 'network':
       return 'text-primary bg-primary/10';
-    case 'config':
-      return 'text-muted-foreground bg-muted';
-    case 'identity':
+    case 'peer':
       return 'text-traffic-out bg-traffic-out/10';
+    case 'identity':
+      return 'text-traffic-in bg-traffic-in/10';
     default:
       return 'text-muted-foreground bg-muted';
+  }
+};
+
+const getChangeTypeColor = (type: string) => {
+  switch (type) {
+    case 'ip':
+      return 'bg-primary/10 text-primary border-primary/30';
+    case 'mac':
+      return 'bg-traffic-in/10 text-traffic-in border-traffic-in/30';
+    case 'hostname':
+      return 'bg-traffic-out/10 text-traffic-out border-traffic-out/30';
+    case 'peer':
+      return 'bg-threat-medium/10 text-threat-medium border-threat-medium/30';
+    case 'port':
+      return 'bg-threat-info/10 text-threat-info border-threat-info/30';
+    case 'vlan':
+      return 'bg-success/10 text-success border-success/30';
+    case 'traffic':
+      return 'bg-destructive/10 text-destructive border-destructive/30';
+    default:
+      return 'bg-muted text-muted-foreground border-muted-foreground/30';
   }
 };
 
@@ -61,13 +83,33 @@ export const TimelineTab = ({ timelineEvents, changeHistory }: TimelineTabProps)
       <div className="grid grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Total Events</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Total Events</p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">All network-detectable events in the last 24 hours</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <p className="text-2xl font-bold font-mono">{timelineEvents.length}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Security Events</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Security Events</p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">Anomalies and detections with MITRE mapping</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <p className="text-2xl font-bold font-mono text-destructive">
               {timelineEvents.filter(e => e.type === 'security').length}
             </p>
@@ -75,7 +117,17 @@ export const TimelineTab = ({ timelineEvents, changeHistory }: TimelineTabProps)
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Network Events</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Network Events</p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">Bandwidth, port, and traffic pattern changes</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <p className="text-2xl font-bold font-mono text-primary">
               {timelineEvents.filter(e => e.type === 'network').length}
             </p>
@@ -83,9 +135,19 @@ export const TimelineTab = ({ timelineEvents, changeHistory }: TimelineTabProps)
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Config Changes</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Identity Changes</p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">IP, MAC, hostname, and VLAN changes detected via DHCP/ARP</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <p className="text-2xl font-bold font-mono">
-              {timelineEvents.filter(e => e.type === 'config').length + changeHistory.length}
+              {timelineEvents.filter(e => e.type === 'identity').length + changeHistory.length}
             </p>
           </CardContent>
         </Card>
@@ -119,16 +181,23 @@ export const TimelineTab = ({ timelineEvents, changeHistory }: TimelineTabProps)
                 <div className="absolute left-6 top-0 bottom-0 w-px bg-border" />
                 
                 <div className="space-y-4">
-                  {filteredEvents.map((event, index) => {
+                  {filteredEvents.map((event) => {
                     const Icon = getEventIcon(event.type);
                     const colorClasses = getEventColor(event.type, event.severity);
                     
                     return (
                       <div key={event.id} className="relative flex gap-4 pl-4">
                         {/* Timeline dot */}
-                        <div className={cn("relative z-10 p-2 rounded-full", colorClasses)}>
-                          <Icon className="h-4 w-4" />
-                        </div>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className={cn("relative z-10 p-2 rounded-full cursor-help", colorClasses)}>
+                              <Icon className="h-4 w-4" />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs capitalize">{event.type} event</p>
+                          </TooltipContent>
+                        </Tooltip>
                         
                         {/* Event content */}
                         <div className="flex-1 pb-4">
@@ -170,18 +239,26 @@ export const TimelineTab = ({ timelineEvents, changeHistory }: TimelineTabProps)
         {/* Change History Sidebar */}
         <div className="col-span-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base font-semibold">Change History</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-base font-semibold">Network Change History</CardTitle>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs max-w-xs">Changes detected via network packets: IP/MAC changes (DHCP/ARP), new peers, port activity, VLAN changes</p>
+                </TooltipContent>
+              </Tooltip>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {changeHistory.map((change) => (
                   <div key={change.id} className="p-3 bg-secondary/50 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
-                      <Badge variant="outline" className="text-xs capitalize">
+                      <Badge variant="outline" className={cn("text-xs capitalize", getChangeTypeColor(change.changeType))}>
                         {change.changeType}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">{change.timestamp}</span>
+                      <span className="text-xs text-muted-foreground">{change.timestamp.split(' ')[0]}</span>
                     </div>
                     <p className="text-sm font-medium">{change.description}</p>
                     {change.oldValue && change.newValue && (
@@ -192,10 +269,7 @@ export const TimelineTab = ({ timelineEvents, changeHistory }: TimelineTabProps)
                       </div>
                     )}
                     {!change.oldValue && change.newValue && (
-                      <p className="text-xs text-muted-foreground mt-1">Added: {change.newValue}</p>
-                    )}
-                    {change.oldValue && !change.newValue && (
-                      <p className="text-xs text-muted-foreground mt-1">Removed: {change.oldValue}</p>
+                      <p className="text-xs text-muted-foreground mt-1">Detected: {change.newValue}</p>
                     )}
                   </div>
                 ))}
