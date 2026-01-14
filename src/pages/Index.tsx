@@ -18,6 +18,7 @@ import {
   mockChangeHistory,
   mockNetworkBehavior,
 } from "@/data/mockData";
+import { mockProtocolActivity } from "@/data/protocolActivityData";
 
 const Index = () => {
   const [selectedAssetId, setSelectedAssetId] = useState<string>(mockAssets[0].id);
@@ -56,6 +57,7 @@ const Index = () => {
             timelineEvents={mockTimelineEvents}
             changeHistory={mockChangeHistory}
             networkBehavior={mockNetworkBehavior}
+            protocolActivity={mockProtocolActivity}
           />
         </div>
       </div>

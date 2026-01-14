@@ -182,3 +182,34 @@ export interface NetworkBehavior {
   uniquePeersYesterday: number;
   newPeersToday: number;
 }
+
+// Protocol Activity Types
+export interface ProtocolTimeSeriesPoint {
+  time: string;
+  inbound: number;
+  outbound: number;
+}
+
+export interface ProtocolActivityData {
+  protocol: string;
+  totalConnections: number;
+  activeConnections: number;
+  inboundBytes: number;
+  outboundBytes: number;
+  inboundPackets: number;
+  outboundPackets: number;
+  avgRtt: number;
+  medianRtt: number;
+  p95Rtt: number;
+  timeSeries: ProtocolTimeSeriesPoint[];
+}
+
+export interface ProtocolStats {
+  accepted: number;
+  connected: number;
+  externalAccepted: number;
+  externalConnected: number;
+  closed: number;
+  abortedIn: number;
+  abortedOut: number;
+}
