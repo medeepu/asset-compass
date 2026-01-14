@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Asset, ThreatEvent, Peer, MitreCategory, FlowData, ProtocolBreakdown, AnomalyDetail, ApplicationData, ConversationData, QoSData, TimelineEvent, ChangeHistoryItem, NetworkBehavior, ProtocolActivityData } from "@/types/asset";
+import { Asset, ThreatEvent, Peer, MitreCategory, FlowData, ProtocolBreakdown, AnomalyDetail, ApplicationData, ConversationData, QoSData, TimelineEvent, ChangeHistoryItem, NetworkBehavior, DNSData, DHCPData } from "@/types/asset";
 import { AssetHeader } from "./AssetHeader";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { OverviewTab } from "./tabs/OverviewTab";
@@ -12,6 +12,7 @@ import { EventsTab } from "./tabs/EventsTab";
 import { TimelineTab } from "./tabs/TimelineTab";
 import { CommentsTab } from "./CommentsTab";
 import { ProtocolActivityTab } from "./tabs/ProtocolActivityTab";
+
 interface AssetDetailPanelProps {
   asset: Asset;
   events: ThreatEvent[];
@@ -26,7 +27,8 @@ interface AssetDetailPanelProps {
   timelineEvents: TimelineEvent[];
   changeHistory: ChangeHistoryItem[];
   networkBehavior: NetworkBehavior;
-  protocolActivity: ProtocolActivityData[];
+  dnsData: DNSData;
+  dhcpData: DHCPData;
 }
 
 export const AssetDetailPanel = ({
@@ -43,7 +45,8 @@ export const AssetDetailPanel = ({
   timelineEvents,
   changeHistory,
   networkBehavior,
-  protocolActivity,
+  dnsData,
+  dhcpData,
 }: AssetDetailPanelProps) => {
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -66,7 +69,7 @@ export const AssetDetailPanel = ({
           />
         );
       case 'protocol':
-        return <ProtocolActivityTab protocolActivity={protocolActivity} />;
+        return <ProtocolActivityTab dnsData={dnsData} dhcpData={dhcpData} />;
       case 'traffic':
         return <TrafficTab flows={flows} />;
       case 'application':
