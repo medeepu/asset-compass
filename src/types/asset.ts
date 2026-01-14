@@ -213,3 +213,87 @@ export interface ProtocolStats {
   abortedIn: number;
   abortedOut: number;
 }
+
+// DNS-specific types
+export interface DNSQueryDomain {
+  domain: string;
+  count: number;
+  color: string;
+}
+
+export interface DNSQueryType {
+  type: string;
+  count: number;
+  color: string;
+}
+
+export interface DNSFailedQuery {
+  errorType: string;
+  totalQueries: number;
+  failures: number;
+  failureRate: string;
+}
+
+export interface DNSClient {
+  name: string;
+  count: number;
+  color: string;
+}
+
+export interface DNSResponseCode {
+  code: string;
+  count: number;
+  color: string;
+}
+
+export interface DNSData {
+  totalQueries: number;
+  uniqueDomains: number;
+  totalErrors: number;
+  avgResponseTime: number;
+  topQueryType: string;
+  topQueriedDomains: DNSQueryDomain[];
+  queryTypeDistribution: DNSQueryType[];
+  failedQueries: DNSFailedQuery[];
+  serverProcessingTime: { time: string; value: number; p95?: number }[];
+  topClientsByVolume: DNSClient[];
+  responseCodeDistribution: DNSResponseCode[];
+}
+
+// DHCP-specific types
+export interface DHCPClient {
+  clientMac: string;
+  hostName: string;
+  requests: number;
+}
+
+export interface DHCPClientError {
+  clientMac: string;
+  hostName: string;
+  errors: number;
+}
+
+export interface DHCPLeasedClient {
+  clientMac: string;
+  clientIp: string;
+  hostName: string;
+  leaseStartTime: string;
+}
+
+export interface DHCPClientResponseTime {
+  clientMac: string;
+  hostName: string;
+  responseTime: number;
+}
+
+export interface DHCPData {
+  totalRequests: number;
+  uniqueClients: number;
+  failureRate: string;
+  avgResponseTime: number;
+  topClientsByRequest: DHCPClient[];
+  responseTimeTrend: { time: string; value: number; p95?: number }[];
+  topClientsByError: DHCPClientError[];
+  recentLeasedClients: DHCPLeasedClient[];
+  topClientsByResponseTime: DHCPClientResponseTime[];
+}
