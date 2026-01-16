@@ -20,6 +20,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Network, Search, RotateCcw, ExternalLink, AlertTriangle, ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface ProtocolActivityTabProps {
   dnsData: DNSData;
@@ -479,16 +480,14 @@ export const ProtocolActivityTab = ({ dnsData, dhcpData }: ProtocolActivityTabPr
   const [trafficDirection, setTrafficDirection] = useState<'client' | 'server'>('client');
 
   const protocols = [
-    { id: 'DNS' as const, label: 'DNS', count: dnsData.totalQueries, hasServer: true },
-    { id: 'DHCP' as const, label: 'DHCP', count: dhcpData.totalRequests, hasServer: true },
+    { id: 'DNS' as const, label: 'DNS', count: dnsData.totalQueries },
+    { id: 'DHCP' as const, label: 'DHCP', count: dhcpData.totalRequests },
   ];
-
-  const currentProtocol = protocols.find(p => p.id === selectedProtocol);
 
   return (
     <div className="flex gap-4 h-[calc(100vh-220px)]">
-      {/* Protocol Navigation Sidebar */}
-      <div className="w-48 flex-shrink-0 space-y-4">
+      {/* Protocol Navigation Sidebar - Compact */}
+      <div className="w-44 flex-shrink-0">
         <Card>
           <CardHeader className="py-3 px-4">
             <CardTitle className="text-sm flex items-center gap-2">
@@ -527,89 +526,66 @@ export const ProtocolActivityTab = ({ dnsData, dhcpData }: ProtocolActivityTabPr
             ))}
           </div>
         </Card>
-
-        {/* Traffic Direction Toggle */}
-        {currentProtocol?.hasServer && (
-          <Card>
-            <CardHeader className="py-3 px-4">
-              <CardTitle className="text-sm">Traffic Direction</CardTitle>
-            </CardHeader>
-            <div className="px-2 pb-3 space-y-1">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => setTrafficDirection('client')}
-                    className={cn(
-                      "w-full px-3 py-2 rounded-md text-left transition-colors flex items-center gap-2",
-                      trafficDirection === 'client'
-                        ? "bg-chart-2/20 text-chart-2 border border-chart-2/30"
-                        : "hover:bg-muted text-muted-foreground"
-                    )}
-                  >
-                    <ArrowUpRight className="h-4 w-4" />
-                    <div>
-                      <span className="font-medium text-sm block">Egress</span>
-                      <span className="text-xs opacity-70">Client Activity</span>
-                    </div>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  <p className="text-xs">View outbound {selectedProtocol} requests from this device</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => setTrafficDirection('server')}
-                    className={cn(
-                      "w-full px-3 py-2 rounded-md text-left transition-colors flex items-center gap-2",
-                      trafficDirection === 'server'
-                        ? "bg-primary/20 text-primary border border-primary/30"
-                        : "hover:bg-muted text-muted-foreground"
-                    )}
-                  >
-                    <ArrowDownLeft className="h-4 w-4" />
-                    <div>
-                      <span className="font-medium text-sm block">Ingress</span>
-                      <span className="text-xs opacity-70">Server Activity</span>
-                    </div>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  <p className="text-xs">View inbound {selectedProtocol} requests to this device (if it's a {selectedProtocol} server)</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </Card>
-        )}
       </div>
 
       {/* Main Content Area */}
       <ScrollArea className="flex-1">
         <div className="pr-4">
-          {/* Direction Badge Header */}
-          <div className="flex items-center gap-2 mb-4">
-            <Badge 
-              variant="outline" 
-              className={cn(
-                "px-3 py-1",
-                trafficDirection === 'client' 
-                  ? "border-chart-2/50 text-chart-2 bg-chart-2/10" 
-                  : "border-primary/50 text-primary bg-primary/10"
-              )}
-            >
-              {trafficDirection === 'client' ? (
-                <><ArrowUpRight className="h-3 w-3 mr-1" /> Egress / Client Activity</>
-              ) : (
-                <><ArrowDownLeft className="h-3 w-3 mr-1" /> Ingress / Server Activity</>
-              )}
-            </Badge>
-            <span className="text-sm text-muted-foreground">
-              {trafficDirection === 'client' 
-                ? `Showing ${selectedProtocol} queries made by this device`
-                : `Showing ${selectedProtocol} requests received by this device as a server`
-              }
-            </span>
+          {/* Header with Traffic Direction Toggle */}
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-semibold">{selectedProtocol} Activity</h2>
+              <span className="text-sm text-muted-foreground">
+                {trafficDirection === 'client' 
+                  ? `Showing ${selectedProtocol} queries made by this device`
+                  : `Showing ${selectedProtocol} requests received by this device as a server`
+                }
+              </span>
+            </div>
+            
+            {/* Traffic Direction Toggle - Moved to right pane header */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Direction:</span>
+              <ToggleGroup 
+                type="single" 
+                value={trafficDirection} 
+                onValueChange={(value) => value && setTrafficDirection(value as 'client' | 'server')}
+                className="bg-muted/50 rounded-lg p-0.5"
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <ToggleGroupItem 
+                      value="client" 
+                      className={cn(
+                        "px-3 py-1.5 text-xs gap-1.5 data-[state=on]:bg-chart-2 data-[state=on]:text-white",
+                      )}
+                    >
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                      Egress
+                    </ToggleGroupItem>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">View outbound {selectedProtocol} requests from this device</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <ToggleGroupItem 
+                      value="server" 
+                      className={cn(
+                        "px-3 py-1.5 text-xs gap-1.5 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
+                      )}
+                    >
+                      <ArrowDownLeft className="h-3.5 w-3.5" />
+                      Ingress
+                    </ToggleGroupItem>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">View inbound {selectedProtocol} requests to this device (if it's a {selectedProtocol} server)</p>
+                  </TooltipContent>
+                </Tooltip>
+              </ToggleGroup>
+            </div>
           </div>
           
           {selectedProtocol === 'DNS' && <DNSTabContent dnsData={dnsData} />}

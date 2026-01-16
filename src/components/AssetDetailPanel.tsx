@@ -3,10 +3,7 @@ import { Asset, ThreatEvent, Peer, MitreCategory, FlowData, ProtocolBreakdown, A
 import { AssetHeader } from "./AssetHeader";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { OverviewTab } from "./tabs/OverviewTab";
-import { TrafficTab } from "./tabs/TrafficTab";
-import { ApplicationTab } from "./tabs/ApplicationTab";
 import { NetworkAnalyticsTab } from "./tabs/NetworkAnalyticsTab";
-import { ConversationTab } from "./tabs/ConversationTab";
 import { EventsTab } from "./tabs/EventsTab";
 import { TimelineTab } from "./tabs/TimelineTab";
 import { CommentsTab } from "./CommentsTab";
@@ -68,14 +65,16 @@ export const AssetDetailPanel = ({
         );
       case 'protocol':
         return <ProtocolActivityTab dnsData={dnsData} dhcpData={dhcpData} />;
-      case 'traffic':
-        return <TrafficTab flows={flows} />;
-      case 'application':
-        return <ApplicationTab applications={applications} />;
       case 'network':
-        return <NetworkAnalyticsTab flows={flows} peers={peers} qosData={qosData} />;
-      case 'conversation':
-        return <ConversationTab conversations={conversations} />;
+        return (
+          <NetworkAnalyticsTab 
+            flows={flows} 
+            peers={peers} 
+            qosData={qosData} 
+            applications={applications}
+            conversations={conversations}
+          />
+        );
       case 'events':
         return <EventsTab events={events} mitreCategories={mitreCategories} />;
       case 'timeline':
