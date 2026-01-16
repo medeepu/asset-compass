@@ -35,12 +35,10 @@ interface AssetHeaderProps {
 
 const tabs = [
   { id: 'overview', label: 'Overview' },
-  { id: 'protocol', label: 'Protocol Activity' },
+  { id: 'protocol', label: 'L7 Protocols' },
   { id: 'traffic', label: 'Traffic' },
   { id: 'application', label: 'Application' },
-  { id: 'source', label: 'Source' },
-  { id: 'destination', label: 'Destination' },
-  { id: 'qos', label: 'QoS' },
+  { id: 'network', label: 'Network Analytics' },
   { id: 'conversation', label: 'Conversation' },
   { id: 'events', label: 'Events', count: 27 },
   { id: 'timeline', label: 'Timeline' },
@@ -75,12 +73,6 @@ export const AssetHeader = ({ asset, activeTab, onTabChange }: AssetHeaderProps)
                   <p className="text-xs">Click to copy IP address</p>
                 </TooltipContent>
               </Tooltip>
-              <Badge variant={asset.status === 'online' ? 'default' : 'secondary'} className={cn(
-                "text-xs",
-                asset.status === 'online' && "bg-success/10 text-success border-success/30"
-              )}>
-                {asset.status}
-              </Badge>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>{asset.deviceType}</span>
