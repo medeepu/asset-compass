@@ -5,8 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { OverviewTab } from "./tabs/OverviewTab";
 import { TrafficTab } from "./tabs/TrafficTab";
 import { ApplicationTab } from "./tabs/ApplicationTab";
-import { SourceDestTab } from "./tabs/SourceDestTab";
-import { QoSTab } from "./tabs/QoSTab";
+import { NetworkAnalyticsTab } from "./tabs/NetworkAnalyticsTab";
 import { ConversationTab } from "./tabs/ConversationTab";
 import { EventsTab } from "./tabs/EventsTab";
 import { TimelineTab } from "./tabs/TimelineTab";
@@ -65,7 +64,6 @@ export const AssetDetailPanel = ({
             changeHistory={changeHistory}
             applications={applications}
             conversations={conversations}
-            networkBehavior={networkBehavior}
           />
         );
       case 'protocol':
@@ -74,12 +72,8 @@ export const AssetDetailPanel = ({
         return <TrafficTab flows={flows} />;
       case 'application':
         return <ApplicationTab applications={applications} />;
-      case 'source':
-        return <SourceDestTab flows={flows} peers={peers} type="source" />;
-      case 'destination':
-        return <SourceDestTab flows={flows} peers={peers} type="destination" />;
-      case 'qos':
-        return <QoSTab qosData={qosData} />;
+      case 'network':
+        return <NetworkAnalyticsTab flows={flows} peers={peers} qosData={qosData} />;
       case 'conversation':
         return <ConversationTab conversations={conversations} />;
       case 'events':
@@ -101,7 +95,6 @@ export const AssetDetailPanel = ({
             changeHistory={changeHistory}
             applications={applications}
             conversations={conversations}
-            networkBehavior={networkBehavior}
           />
         );
     }

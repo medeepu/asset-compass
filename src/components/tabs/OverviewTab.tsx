@@ -1,6 +1,5 @@
-import { Asset, ThreatEvent, Peer, MitreCategory, FlowData, ProtocolBreakdown, AnomalyDetail, ChangeHistoryItem, ApplicationData, ConversationData, NetworkBehavior } from "@/types/asset";
+import { Asset, ThreatEvent, Peer, MitreCategory, FlowData, ProtocolBreakdown, AnomalyDetail, ChangeHistoryItem, ApplicationData, ConversationData } from "@/types/asset";
 import { DeviceSummaryCard } from "../DeviceSummaryCard";
-import { NetworkBehaviorCard } from "../NetworkBehaviorCard";
 import { DetectionAlertsCard } from "../DetectionAlertsCard";
 import { PeerSummaryCard } from "../PeerSummaryCard";
 import { ApplicationHighlightsCard } from "../ApplicationHighlightsCard";
@@ -21,7 +20,6 @@ interface OverviewTabProps {
   changeHistory: ChangeHistoryItem[];
   applications: ApplicationData[];
   conversations: ConversationData[];
-  networkBehavior: NetworkBehavior;
 }
 
 export const OverviewTab = ({
@@ -33,7 +31,6 @@ export const OverviewTab = ({
   changeHistory,
   applications,
   conversations,
-  networkBehavior,
 }: OverviewTabProps) => {
   return (
     <div className="space-y-6">
@@ -43,10 +40,7 @@ export const OverviewTab = ({
           <DeviceSummaryCard asset={asset} />
         </div>
         <div className="col-span-4">
-          <div className="space-y-4">
-            <ScoreCards asset={asset} />
-            <NetworkBehaviorCard behavior={networkBehavior} />
-          </div>
+          <ScoreCards asset={asset} />
         </div>
         <div className="col-span-4">
           <DetectionAlertsCard anomalies={anomalies} />

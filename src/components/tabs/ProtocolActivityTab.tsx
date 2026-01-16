@@ -18,7 +18,8 @@ import {
   ReferenceLine,
 } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Network, Search, RotateCcw, ExternalLink, AlertTriangle } from "lucide-react";
+import { Network, Search, RotateCcw, ExternalLink, AlertTriangle, ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface ProtocolActivityTabProps {
   dnsData: DNSData;
@@ -475,21 +476,24 @@ const DHCPTabContent = ({ dhcpData }: { dhcpData: DHCPData }) => (
 
 export const ProtocolActivityTab = ({ dnsData, dhcpData }: ProtocolActivityTabProps) => {
   const [selectedProtocol, setSelectedProtocol] = useState<'DNS' | 'DHCP'>('DNS');
+  const [trafficDirection, setTrafficDirection] = useState<'client' | 'server'>('client');
 
   const protocols = [
-    { id: 'DNS' as const, label: 'DNS', count: dnsData.totalQueries },
-    { id: 'DHCP' as const, label: 'DHCP', count: dhcpData.totalRequests },
+    { id: 'DNS' as const, label: 'DNS', count: dnsData.totalQueries, hasServer: true },
+    { id: 'DHCP' as const, label: 'DHCP', count: dhcpData.totalRequests, hasServer: true },
   ];
+
+  const currentProtocol = protocols.find(p => p.id === selectedProtocol);
 
   return (
     <div className="flex gap-4 h-[calc(100vh-220px)]">
       {/* Protocol Navigation Sidebar */}
-      <div className="w-44 flex-shrink-0">
-        <Card className="h-full">
+      <div className="w-48 flex-shrink-0 space-y-4">
+        <Card>
           <CardHeader className="py-3 px-4">
             <CardTitle className="text-sm flex items-center gap-2">
               <Network className="h-4 w-4 text-primary" />
-              Protocols
+              L7 Protocols
             </CardTitle>
           </CardHeader>
           <div className="px-2 pb-2 space-y-0.5">
@@ -523,11 +527,91 @@ export const ProtocolActivityTab = ({ dnsData, dhcpData }: ProtocolActivityTabPr
             ))}
           </div>
         </Card>
+
+        {/* Traffic Direction Toggle */}
+        {currentProtocol?.hasServer && (
+          <Card>
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm">Traffic Direction</CardTitle>
+            </CardHeader>
+            <div className="px-2 pb-3 space-y-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setTrafficDirection('client')}
+                    className={cn(
+                      "w-full px-3 py-2 rounded-md text-left transition-colors flex items-center gap-2",
+                      trafficDirection === 'client'
+                        ? "bg-chart-2/20 text-chart-2 border border-chart-2/30"
+                        : "hover:bg-muted text-muted-foreground"
+                    )}
+                  >
+                    <ArrowUpRight className="h-4 w-4" />
+                    <div>
+                      <span className="font-medium text-sm block">Egress</span>
+                      <span className="text-xs opacity-70">Client Activity</span>
+                    </div>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p className="text-xs">View outbound {selectedProtocol} requests from this device</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setTrafficDirection('server')}
+                    className={cn(
+                      "w-full px-3 py-2 rounded-md text-left transition-colors flex items-center gap-2",
+                      trafficDirection === 'server'
+                        ? "bg-primary/20 text-primary border border-primary/30"
+                        : "hover:bg-muted text-muted-foreground"
+                    )}
+                  >
+                    <ArrowDownLeft className="h-4 w-4" />
+                    <div>
+                      <span className="font-medium text-sm block">Ingress</span>
+                      <span className="text-xs opacity-70">Server Activity</span>
+                    </div>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p className="text-xs">View inbound {selectedProtocol} requests to this device (if it's a {selectedProtocol} server)</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* Main Content Area */}
       <ScrollArea className="flex-1">
         <div className="pr-4">
+          {/* Direction Badge Header */}
+          <div className="flex items-center gap-2 mb-4">
+            <Badge 
+              variant="outline" 
+              className={cn(
+                "px-3 py-1",
+                trafficDirection === 'client' 
+                  ? "border-chart-2/50 text-chart-2 bg-chart-2/10" 
+                  : "border-primary/50 text-primary bg-primary/10"
+              )}
+            >
+              {trafficDirection === 'client' ? (
+                <><ArrowUpRight className="h-3 w-3 mr-1" /> Egress / Client Activity</>
+              ) : (
+                <><ArrowDownLeft className="h-3 w-3 mr-1" /> Ingress / Server Activity</>
+              )}
+            </Badge>
+            <span className="text-sm text-muted-foreground">
+              {trafficDirection === 'client' 
+                ? `Showing ${selectedProtocol} queries made by this device`
+                : `Showing ${selectedProtocol} requests received by this device as a server`
+              }
+            </span>
+          </div>
+          
           {selectedProtocol === 'DNS' && <DNSTabContent dnsData={dnsData} />}
           {selectedProtocol === 'DHCP' && <DHCPTabContent dhcpData={dhcpData} />}
         </div>
