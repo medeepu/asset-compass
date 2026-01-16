@@ -36,10 +36,7 @@ interface AssetHeaderProps {
 const tabs = [
   { id: 'overview', label: 'Overview' },
   { id: 'protocol', label: 'L7 Protocols' },
-  { id: 'traffic', label: 'Traffic' },
-  { id: 'application', label: 'Application' },
   { id: 'network', label: 'Network Analytics' },
-  { id: 'conversation', label: 'Conversation' },
   { id: 'events', label: 'Events', count: 27 },
   { id: 'timeline', label: 'Timeline' },
   { id: 'comments', label: 'Comments', count: 2 },
