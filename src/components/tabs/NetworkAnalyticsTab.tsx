@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FlowData, Peer, QoSData, ApplicationData, ConversationData } from "@/types/asset";
+import { FlowData, Peer, QoSData, ConversationData } from "@/types/asset";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -14,38 +14,17 @@ import {
   ArrowDownLeft, 
   Gauge, 
   Network, 
-  Activity, 
-  ArrowDown, 
-  ArrowUp, 
-  Clock, 
   ChevronDown, 
   ChevronUp,
   Search,
-  Filter,
   Download,
   ArrowRight,
-  AlertTriangle,
-  Layers
 } from "lucide-react";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip as RechartsTooltip,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-} from "recharts";
 
 interface NetworkAnalyticsTabProps {
   flows: FlowData[];
   peers: Peer[];
   qosData: QoSData[];
-  applications: ApplicationData[];
   conversations: ConversationData[];
 }
 
@@ -56,17 +35,6 @@ const formatBytes = (bytes: number): string => {
   return `${bytes} B`;
 };
 
-const trafficData = [
-  { time: '00:00', inbound: 120, outbound: 80 },
-  { time: '04:00', inbound: 45, outbound: 30 },
-  { time: '08:00', inbound: 280, outbound: 190 },
-  { time: '12:00', inbound: 420, outbound: 380 },
-  { time: '16:00', inbound: 380, outbound: 320 },
-  { time: '18:00', inbound: 520, outbound: 450 },
-  { time: '20:00', inbound: 340, outbound: 280 },
-  { time: '23:59', inbound: 180, outbound: 120 },
-];
-
 const topTalkers = [
   { ip: '10.0.0.50', bytes: 15240000, direction: 'outbound' },
   { ip: '192.168.1.100', bytes: 8920000, direction: 'inbound' },
@@ -75,25 +43,13 @@ const topTalkers = [
   { ip: '10.10.10.1', bytes: 2800000, direction: 'outbound' },
 ];
 
-const COLORS = [
-  'hsl(var(--primary))',
-  'hsl(var(--traffic-out))',
-  'hsl(var(--threat-medium))',
-  'hsl(var(--threat-low))',
-  'hsl(var(--muted-foreground))',
-];
-
-export const NetworkAnalyticsTab = ({ flows, peers, qosData, applications, conversations }: NetworkAnalyticsTabProps) => {
+export const NetworkAnalyticsTab = ({ flows, peers, qosData, conversations }: NetworkAnalyticsTabProps) => {
   const [showAllConversations, setShowAllConversations] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAllFlows, setShowAllFlows] = useState(false);
 
   const sourcePeers = peers.filter((_, i) => i < 5);
   const destPeers = peers.filter((_, i) => i >= 5 || peers.length <= 5);
-  
-  const totalInbound = flows.filter(f => f.direction === 'inbound').reduce((sum, f) => sum + f.bytes, 0);
-  const totalOutbound = flows.filter(f => f.direction === 'outbound').reduce((sum, f) => sum + f.bytes, 0);
-  const totalPackets = flows.reduce((sum, f) => sum + f.packets, 0);
 
   const filteredConversations = conversations.filter(conv =>
     conv.sourceIp.includes(searchQuery) ||
@@ -103,175 +59,8 @@ export const NetworkAnalyticsTab = ({ flows, peers, qosData, applications, conve
 
   const displayedConversations = showAllConversations ? filteredConversations : filteredConversations.slice(0, 5);
 
-  const pieData = applications.slice(0, 5).map((app, index) => ({
-    name: app.name,
-    value: app.bytes,
-    color: COLORS[index % COLORS.length],
-  }));
-
-  const highRiskApps = applications.filter(app => app.risk === 'high');
-
   return (
     <div className="space-y-6">
-      {/* Traffic Summary Banner */}
-      <div className="grid grid-cols-5 gap-3">
-        <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/20 rounded-lg">
-                <ArrowDown className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Inbound</p>
-                <p className="text-lg font-bold font-mono">{formatBytes(totalInbound)}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-gradient-to-br from-traffic-out/10 to-traffic-out/5 border-traffic-out/20">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-traffic-out/20 rounded-lg">
-                <ArrowUp className="h-4 w-4 text-traffic-out" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Outbound</p>
-                <p className="text-lg font-bold font-mono">{formatBytes(totalOutbound)}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-secondary rounded-lg">
-                <Activity className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Total Packets</p>
-                <p className="text-lg font-bold font-mono">{totalPackets.toLocaleString()}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-secondary rounded-lg">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Active Flows</p>
-                <p className="text-lg font-bold font-mono">{flows.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className={highRiskApps.length > 0 ? 'border-destructive/50 bg-destructive/5' : ''}>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className={cn("p-2 rounded-lg", highRiskApps.length > 0 ? "bg-destructive/20" : "bg-secondary")}>
-                <AlertTriangle className={cn("h-4 w-4", highRiskApps.length > 0 ? "text-destructive" : "text-muted-foreground")} />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">High Risk Apps</p>
-                <p className="text-lg font-bold font-mono">{highRiskApps.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Traffic Chart and Application Distribution */}
-      <div className="grid grid-cols-3 gap-4">
-        <Card className="col-span-2">
-          <CardHeader className="py-3 px-4">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Activity className="h-4 w-4 text-primary" />
-              Traffic Over Time
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="h-52">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={trafficData}>
-                  <defs>
-                    <linearGradient id="colorIn" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorOut" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--traffic-out))" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="hsl(var(--traffic-out))" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
-                  <XAxis dataKey="time" stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                  <RechartsTooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      fontSize: '12px'
-                    }}
-                  />
-                  <Area type="monotone" dataKey="inbound" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#colorIn)" name="Inbound" />
-                  <Area type="monotone" dataKey="outbound" stroke="hsl(var(--traffic-out))" strokeWidth={2} fill="url(#colorOut)" name="Outbound" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="py-3 px-4">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Layers className="h-4 w-4 text-primary" />
-              Application Distribution
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="h-52">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={40}
-                    outerRadius={70}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip 
-                    formatter={(value: number) => formatBytes(value)}
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      fontSize: '12px'
-                    }}
-                  />
-                  <Legend 
-                    wrapperStyle={{ fontSize: '10px' }}
-                    formatter={(value) => <span className="text-xs">{value}</span>}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Source/Destination and QoS */}
       <div className="grid grid-cols-3 gap-4">
         {/* Source Analysis */}
@@ -388,7 +177,7 @@ export const NetworkAnalyticsTab = ({ flows, peers, qosData, applications, conve
       <Card>
         <CardHeader className="py-3 px-4">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <Activity className="h-4 w-4 text-primary" />
+            <Network className="h-4 w-4 text-primary" />
             Top Talkers
           </CardTitle>
         </CardHeader>
