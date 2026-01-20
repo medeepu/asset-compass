@@ -152,9 +152,7 @@ export const AssetsOverviewPanel = ({ assets, onSelectAsset }: AssetsOverviewPan
       {/* Header */}
       <div className="bg-card border-b border-border px-6 py-4">
         <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-xl font-semibold text-foreground">Browse Assets</h1>
-          </div>
+          <h1 className="text-xl font-semibold text-foreground">Browse Assets</h1>
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" className="gap-2">
               <Filter className="h-4 w-4" />
@@ -167,94 +165,74 @@ export const AssetsOverviewPanel = ({ assets, onSelectAsset }: AssetsOverviewPan
           </div>
         </div>
         
-        {/* Summary Stats Row */}
+        {/* Summary Stats Row - Aligned Grid */}
         <div className="grid grid-cols-7 gap-3">
           {headerStats.map((stat, index) => (
-            <Card key={index} className="bg-secondary/30 border-border/50">
-              <CardContent className="py-3 px-4">
-                <p className="text-xs text-muted-foreground">{stat.label}</p>
-                <p className={cn("text-lg font-bold font-mono", stat.color)}>
-                  {stat.value} {stat.label.toLowerCase().includes('device') && stat.value > 0 && 
-                    <span className="text-xs font-normal text-muted-foreground">
-                      {stat.label.toLowerCase().includes('new') ? 'new devices' : 
-                       stat.label.toLowerCase().includes('active') ? 'active devices' :
-                       stat.label.toLowerCase().includes('group') ? 'device groups' : ''}
-                    </span>
-                  }
-                </p>
-              </CardContent>
-            </Card>
+            <div key={index} className="bg-secondary/30 border border-border/50 rounded-lg p-3">
+              <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
+              <p className="text-primary text-lg font-bold font-mono leading-none">
+                {stat.value} <span className="text-xs font-normal text-muted-foreground">{stat.label.toLowerCase().replace(/s$/, '').replace('device', 'device')}{stat.value !== 1 ? 's' : ''}</span>
+              </p>
+            </div>
           ))}
         </div>
       </div>
 
       <ScrollArea className="flex-1">
         <div className="p-6 space-y-6">
-          {/* Devices by Role and Protocol */}
-          <div className="grid grid-cols-5 gap-6">
-            {/* Devices by Role */}
-            <Card className="col-span-3">
-              <CardHeader className="py-3 px-4">
-                <CardTitle className="text-sm font-medium">Devices by Role</CardTitle>
-              </CardHeader>
-              <CardContent className="px-4 pb-4">
-                <div className="grid grid-cols-3 gap-3">
-                  {deviceRoles.map((role) => {
-                    const IconComponent = role.icon;
-                    return (
-                      <Tooltip key={role.id}>
-                        <TooltipTrigger asChild>
-                          <div className={cn(
-                            "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
-                            role.count > 0 
-                              ? "bg-secondary/30 border-border hover:bg-secondary/50" 
-                              : "bg-muted/20 border-border/50 opacity-60"
-                          )}>
-                            <IconComponent className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium truncate">{role.label}</p>
-                              <p className={cn(
-                                "text-xs font-mono",
-                                role.count > 0 ? "text-primary" : "text-muted-foreground"
-                              )}>
-                                {role.count} Device{role.count !== 1 ? 's' : ''}
-                              </p>
-                            </div>
+          {/* Devices by Role and Protocol - Side by Side */}
+          <div className="grid grid-cols-12 gap-6">
+            {/* Devices by Role - Takes 7 columns */}
+            <div className="col-span-7">
+              <h2 className="text-sm font-medium text-foreground mb-3">Devices by Role</h2>
+              <div className="grid grid-cols-3 gap-2">
+                {deviceRoles.map((role) => {
+                  const IconComponent = role.icon;
+                  return (
+                    <Tooltip key={role.id}>
+                      <TooltipTrigger asChild>
+                        <div className={cn(
+                          "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors h-[60px]",
+                          role.count > 0 
+                            ? "bg-secondary/30 border-border hover:bg-secondary/50" 
+                            : "bg-muted/10 border-border/30 opacity-50"
+                        )}>
+                          <IconComponent className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate leading-tight">{role.label}</p>
+                            <p className={cn(
+                              "text-xs font-mono leading-tight",
+                              role.count > 0 ? "text-primary" : "text-muted-foreground"
+                            )}>
+                              {role.count} Device{role.count !== 1 ? 's' : ''}
+                            </p>
                           </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs">View {role.count} {role.label} device{role.count !== 1 ? 's' : ''}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs">View {role.count} {role.label} device{role.count !== 1 ? 's' : ''}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+              </div>
+            </div>
 
-            {/* Devices by Protocol */}
-            <Card className="col-span-2">
-              <CardHeader className="py-3 px-4">
-                <CardTitle className="text-sm font-medium">Devices by Protocol</CardTitle>
-              </CardHeader>
-              <CardContent className="px-4 pb-4">
-                <ScrollArea className="h-[400px]">
-                  <div className="space-y-2">
+            {/* Devices by Protocol - Takes 5 columns */}
+            <div className="col-span-5">
+              <h2 className="text-sm font-medium text-foreground mb-3">Devices by Protocol</h2>
+              <div className="bg-secondary/20 rounded-lg border border-border/50 overflow-hidden">
+                <ScrollArea className="h-[460px]">
+                  <div className="divide-y divide-border/30">
                     {protocolStats.map((protocol, index) => (
                       <Tooltip key={index}>
                         <TooltipTrigger asChild>
-                          <div className="flex items-center justify-between p-2.5 bg-secondary/30 rounded-lg hover:bg-secondary/50 cursor-pointer transition-colors">
-                            <span className="text-sm font-medium">{protocol.name}</span>
-                            <div className="flex items-center gap-4">
-                              <div className="flex items-center gap-1.5">
-                                <ArrowDownLeft className="h-3 w-3 text-primary" />
-                                <span className="text-xs font-mono text-primary">{protocol.servers} server{protocol.servers !== 1 ? 's' : ''}</span>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <ArrowUpRight className="h-3 w-3 text-chart-2" />
-                                <span className="text-xs font-mono text-chart-2">{protocol.clients} client{protocol.clients !== 1 ? 's' : ''}</span>
-                              </div>
-                              <Settings className="h-3.5 w-3.5 text-muted-foreground" />
+                          <div className="flex items-center justify-between px-4 py-3 hover:bg-secondary/30 cursor-pointer transition-colors">
+                            <span className="text-sm font-medium text-foreground">{protocol.name}</span>
+                            <div className="flex items-center gap-6">
+                              <span className="text-xs font-mono text-primary w-20 text-right">{protocol.servers} server{protocol.servers !== 1 ? 's' : ''}</span>
+                              <span className="text-xs font-mono text-chart-2 w-20 text-right">{protocol.clients} client{protocol.clients !== 1 ? 's' : ''}</span>
+                              <Settings className="h-4 w-4 text-muted-foreground" />
                             </div>
                           </div>
                         </TooltipTrigger>
@@ -265,173 +243,153 @@ export const AssetsOverviewPanel = ({ assets, onSelectAsset }: AssetsOverviewPan
                     ))}
                   </div>
                 </ScrollArea>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
-          {/* Traffic Overview and Risk Summary */}
+          {/* Traffic Overview and Risk Summary - Equal Height Cards */}
           <div className="grid grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <ArrowDownLeft className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Inbound Traffic</p>
-                    <p className="text-2xl font-bold font-mono">{formatBytes(totalBytesIn)}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="bg-secondary/30 border border-border/50 rounded-lg p-4 flex items-center gap-4">
+              <div className="p-2.5 bg-primary/10 rounded-lg">
+                <ArrowDownLeft className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-0.5">Inbound Traffic</p>
+                <p className="text-xl font-bold font-mono text-foreground">{formatBytes(totalBytesIn)}</p>
+              </div>
+            </div>
 
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-chart-2/10 rounded-lg">
-                    <ArrowUpRight className="h-5 w-5 text-chart-2" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Outbound Traffic</p>
-                    <p className="text-2xl font-bold font-mono">{formatBytes(totalBytesOut)}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="bg-secondary/30 border border-border/50 rounded-lg p-4 flex items-center gap-4">
+              <div className="p-2.5 bg-chart-2/10 rounded-lg">
+                <ArrowUpRight className="h-5 w-5 text-chart-2" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-0.5">Outbound Traffic</p>
+                <p className="text-xl font-bold font-mono text-foreground">{formatBytes(totalBytesOut)}</p>
+              </div>
+            </div>
 
-            <Card className="border-destructive/50 bg-destructive/5">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-destructive/20 rounded-lg">
-                    <AlertTriangle className="h-5 w-5 text-destructive" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Critical Risk</p>
-                    <p className="text-2xl font-bold font-mono">{criticalAssets}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="bg-destructive/5 border border-destructive/30 rounded-lg p-4 flex items-center gap-4">
+              <div className="p-2.5 bg-destructive/20 rounded-lg">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-0.5">Critical Risk Assets</p>
+                <p className="text-xl font-bold font-mono text-destructive">{criticalAssets}</p>
+              </div>
+            </div>
 
-            <Card className="border-threat-high/50 bg-threat-high/5">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-threat-high/20 rounded-lg">
-                    <Shield className="h-5 w-5 text-threat-high" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">High Risk</p>
-                    <p className="text-2xl font-bold font-mono">{highRiskAssets}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="bg-threat-high/5 border border-threat-high/30 rounded-lg p-4 flex items-center gap-4">
+              <div className="p-2.5 bg-threat-high/20 rounded-lg">
+                <Shield className="h-5 w-5 text-threat-high" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-0.5">High Risk Assets</p>
+                <p className="text-xl font-bold font-mono text-threat-high">{highRiskAssets}</p>
+              </div>
+            </div>
           </div>
 
           {/* Top Risky Assets */}
-          <Card>
-            <CardHeader className="py-3 px-4">
-              <CardTitle className="text-sm font-medium">Top Risky Assets</CardTitle>
-            </CardHeader>
-            <CardContent className="px-4 pb-4">
-              <div className="grid grid-cols-5 gap-3">
-                {topRiskyAssets.map((asset, index) => {
-                  const DeviceIcon = getDeviceIcon(asset.deviceType);
-                  return (
-                    <Tooltip key={asset.id}>
-                      <TooltipTrigger asChild>
-                        <div 
-                          className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors"
-                          onClick={() => onSelectAsset(asset.id)}
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-xs font-mono text-muted-foreground">#{index + 1}</span>
-                            <DeviceIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-xs font-medium truncate">{asset.name}</span>
-                          </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <ScoreBadge score={asset.threatScore} label="" size="sm" showLabel={false} />
-                            <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                          </div>
+          <div>
+            <h2 className="text-sm font-medium text-foreground mb-3">Top Risky Assets</h2>
+            <div className="grid grid-cols-5 gap-3">
+              {topRiskyAssets.map((asset, index) => {
+                const DeviceIcon = getDeviceIcon(asset.deviceType);
+                return (
+                  <Tooltip key={asset.id}>
+                    <TooltipTrigger asChild>
+                      <div 
+                        className="flex items-center justify-between p-3 bg-secondary/30 border border-border/50 rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors h-[52px]"
+                        onClick={() => onSelectAsset(asset.id)}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-xs font-mono text-muted-foreground">#{index + 1}</span>
+                          <DeviceIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="text-xs font-medium truncate">{asset.name}</span>
                         </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="text-xs">{asset.ip} - {asset.deviceType}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <ScoreBadge score={asset.threatScore} label="" size="sm" showLabel={false} />
+                          <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                        </div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-xs">{asset.ip} - {asset.deviceType}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          </div>
 
           {/* Assets Table */}
-          <Card>
-            <CardHeader className="py-3 px-4 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-medium">All Assets</CardTitle>
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-medium text-foreground">All Assets</h2>
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
                   placeholder="Search assets..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-8 w-64 text-sm"
+                  className="pl-9 h-8 w-64 text-sm bg-secondary/30 border-border/50"
                 />
               </div>
-            </CardHeader>
-            <CardContent className="px-4 pb-4">
-              <div className="rounded-md border border-border overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/30">
-                      <TableHead className="text-xs font-semibold">Asset Name</TableHead>
-                      <TableHead className="text-xs font-semibold">IP Address</TableHead>
-                      <TableHead className="text-xs font-semibold">Type</TableHead>
-                      <TableHead className="text-xs font-semibold">Role</TableHead>
-                      <TableHead className="text-xs font-semibold">Owner</TableHead>
-                      <TableHead className="text-xs font-semibold text-center">Threat Score</TableHead>
-                      <TableHead className="text-xs font-semibold text-center">Confidence</TableHead>
-                      <TableHead className="text-xs font-semibold">Last Seen</TableHead>
-                      <TableHead className="text-xs font-semibold w-12"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAssets.map((asset) => {
-                      const DeviceIcon = getDeviceIcon(asset.deviceType);
-                      return (
-                        <TableRow 
-                          key={asset.id} 
-                          className="hover:bg-secondary/50 cursor-pointer"
-                          onClick={() => onSelectAsset(asset.id)}
-                        >
-                          <TableCell className="font-medium text-sm">
-                            <div className="flex items-center gap-2">
-                              <DeviceIcon className="h-4 w-4 text-muted-foreground" />
-                              {asset.name}
-                            </div>
-                          </TableCell>
-                          <TableCell className="font-mono text-xs">{asset.ip}</TableCell>
-                          <TableCell className="text-xs">{asset.deviceType}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-xs">{asset.roleTag}</Badge>
-                          </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">{asset.owner}</TableCell>
-                          <TableCell className="text-center">
-                            <ScoreBadge score={asset.threatScore} label="" size="sm" showLabel={false} />
-                          </TableCell>
-                          <TableCell className="text-center font-mono text-xs">{asset.confidenceScore}%</TableCell>
-                          <TableCell className="text-xs text-muted-foreground">{asset.lastSeen.split(' ')[0]}</TableCell>
-                          <TableCell>
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="rounded-lg border border-border/50 overflow-hidden bg-secondary/20">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-secondary/30 border-b border-border/50">
+                    <TableHead className="text-xs font-semibold text-muted-foreground">Asset Name</TableHead>
+                    <TableHead className="text-xs font-semibold text-muted-foreground">IP Address</TableHead>
+                    <TableHead className="text-xs font-semibold text-muted-foreground">Type</TableHead>
+                    <TableHead className="text-xs font-semibold text-muted-foreground">Role</TableHead>
+                    <TableHead className="text-xs font-semibold text-muted-foreground">Owner</TableHead>
+                    <TableHead className="text-xs font-semibold text-muted-foreground text-center">Threat Score</TableHead>
+                    <TableHead className="text-xs font-semibold text-muted-foreground text-center">Confidence</TableHead>
+                    <TableHead className="text-xs font-semibold text-muted-foreground">Last Seen</TableHead>
+                    <TableHead className="text-xs font-semibold text-muted-foreground w-12"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAssets.map((asset) => {
+                    const DeviceIcon = getDeviceIcon(asset.deviceType);
+                    return (
+                      <TableRow 
+                        key={asset.id} 
+                        className="cursor-pointer hover:bg-secondary/40 transition-colors border-b border-border/30"
+                        onClick={() => onSelectAsset(asset.id)}
+                      >
+                        <TableCell className="py-2.5">
+                          <div className="flex items-center gap-2">
+                            <DeviceIcon className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm font-medium text-foreground">{asset.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-2.5 font-mono text-xs text-foreground">{asset.ip}</TableCell>
+                        <TableCell className="py-2.5 text-xs text-muted-foreground">{asset.deviceType}</TableCell>
+                        <TableCell className="py-2.5">
+                          <Badge variant="outline" className="text-xs">{asset.roleTag}</Badge>
+                        </TableCell>
+                        <TableCell className="py-2.5 text-xs text-muted-foreground">{asset.owner}</TableCell>
+                        <TableCell className="py-2.5 text-center">
+                          <ScoreBadge score={asset.threatScore} label="" size="sm" showLabel={false} />
+                        </TableCell>
+                        <TableCell className="py-2.5 text-center">
+                          <span className="text-xs font-mono text-muted-foreground">{asset.confidenceScore}%</span>
+                        </TableCell>
+                        <TableCell className="py-2.5 text-xs text-muted-foreground">{asset.lastSeen.split(' ')[0]}</TableCell>
+                        <TableCell className="py-2.5">
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         </div>
       </ScrollArea>
     </div>
