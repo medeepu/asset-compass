@@ -38,6 +38,7 @@ const tabs = [
   { id: 'traffic', label: 'Traffic' },
   { id: 'application', label: 'Application' },
   { id: 'network', label: 'Network Analytics' },
+  { id: 'qos', label: 'QoS' },
   { id: 'protocol', label: 'L7 Protocols' },
   { id: 'events', label: 'Events', count: 27 },
   { id: 'timeline', label: 'Timeline' },

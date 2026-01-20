@@ -1,18 +1,15 @@
 import { useState } from "react";
-import { FlowData, Peer, QoSData, ConversationData } from "@/types/asset";
+import { FlowData, Peer, ConversationData } from "@/types/asset";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { cn } from "@/lib/utils";
 import { 
   ArrowUpRight, 
   ArrowDownLeft, 
-  Gauge, 
   Network, 
   ChevronDown, 
   ChevronUp,
@@ -20,11 +17,11 @@ import {
   Download,
   ArrowRight,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface NetworkAnalyticsTabProps {
   flows: FlowData[];
   peers: Peer[];
-  qosData: QoSData[];
   conversations: ConversationData[];
 }
 
@@ -43,7 +40,7 @@ const topTalkers = [
   { ip: '10.10.10.1', bytes: 2800000, direction: 'outbound' },
 ];
 
-export const NetworkAnalyticsTab = ({ flows, peers, qosData, conversations }: NetworkAnalyticsTabProps) => {
+export const NetworkAnalyticsTab = ({ flows, peers, conversations }: NetworkAnalyticsTabProps) => {
   const [showAllConversations, setShowAllConversations] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAllFlows, setShowAllFlows] = useState(false);
@@ -61,8 +58,8 @@ export const NetworkAnalyticsTab = ({ flows, peers, qosData, conversations }: Ne
 
   return (
     <div className="space-y-6">
-      {/* Source/Destination and QoS */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* Source/Destination Analysis */}
+      <div className="grid grid-cols-2 gap-4">
         {/* Source Analysis */}
         <Card>
           <CardHeader className="py-3 px-4">
@@ -124,51 +121,6 @@ export const NetworkAnalyticsTab = ({ flows, peers, qosData, conversations }: Ne
                 </TableBody>
               </Table>
             </ScrollArea>
-          </CardContent>
-        </Card>
-
-        {/* QoS Metrics */}
-        <Card>
-          <CardHeader className="py-3 px-4">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Gauge className="h-4 w-4 text-primary" />
-              QoS Metrics
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="space-y-3">
-              {qosData.slice(0, 4).map((metric, i) => {
-                const getStatus = (val: number, threshold: number) => val < threshold * 0.5 ? 'good' : val < threshold ? 'warning' : 'critical';
-                const latencyStatus = getStatus(metric.latency, 100);
-                
-                return (
-                  <Tooltip key={i}>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center justify-between p-2 bg-secondary/30 rounded-lg cursor-help">
-                        <div className="flex items-center gap-2">
-                          <Badge 
-                            variant="outline" 
-                            className={cn(
-                              "text-[10px] px-1.5 py-0",
-                              latencyStatus === 'good' ? 'border-success text-success' :
-                              latencyStatus === 'warning' ? 'border-threat-medium text-threat-medium' : 
-                              'border-destructive text-destructive'
-                            )}
-                          >
-                            {latencyStatus}
-                          </Badge>
-                          <span className="text-xs font-medium truncate max-w-[80px]">{metric.application}</span>
-                        </div>
-                        <span className="text-xs font-mono">{metric.latency}ms</span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-xs">Jitter: {metric.jitter}ms | Packet Loss: {metric.packetLoss}% | MOS: {metric.mos}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              })}
-            </div>
           </CardContent>
         </Card>
       </div>
