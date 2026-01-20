@@ -6,6 +6,7 @@ import { OverviewTab } from "./tabs/OverviewTab";
 import { TrafficTab } from "./tabs/TrafficTab";
 import { ApplicationTab } from "./tabs/ApplicationTab";
 import { NetworkAnalyticsTab } from "./tabs/NetworkAnalyticsTab";
+import { QoSTab } from "./tabs/QoSTab";
 import { EventsTab } from "./tabs/EventsTab";
 import { TimelineTab } from "./tabs/TimelineTab";
 import { CommentsTab } from "./CommentsTab";
@@ -76,10 +77,11 @@ export const AssetDetailPanel = ({
           <NetworkAnalyticsTab 
             flows={flows} 
             peers={peers} 
-            qosData={qosData} 
             conversations={conversations}
           />
         );
+      case 'qos':
+        return <QoSTab qosData={qosData} />;
       case 'events':
         return <EventsTab events={events} mitreCategories={mitreCategories} />;
       case 'timeline':

@@ -20,7 +20,22 @@ import {
   TrendingUp,
   Filter,
   Download,
-  ChevronRight
+  ChevronRight,
+  Database,
+  Wifi,
+  Globe,
+  HardDrive,
+  Router,
+  Camera,
+  Phone,
+  Printer,
+  Users,
+  Folder,
+  AppWindow,
+  Network,
+  Settings,
+  ArrowDownLeft,
+  ArrowUpRight
 } from "lucide-react";
 import { useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
@@ -31,11 +46,11 @@ interface AssetsOverviewPanelProps {
 }
 
 const COLORS = [
-  'hsl(var(--destructive))',
-  'hsl(var(--threat-high))',
-  'hsl(var(--threat-medium))',
-  'hsl(var(--threat-low))',
-  'hsl(var(--muted-foreground))',
+  'hsl(var(--primary))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))',
+  'hsl(var(--chart-5))',
 ];
 
 const getDeviceIcon = (type: string) => {
@@ -52,6 +67,58 @@ const getDeviceIcon = (type: string) => {
   }
 };
 
+// Device roles with icons
+const deviceRoles = [
+  { id: 'domain-controller', label: 'Domain Controller', icon: Server, count: 5 },
+  { id: 'file-server', label: 'File Server', icon: HardDrive, count: 8 },
+  { id: 'mobile-device', label: 'Mobile Device', icon: Smartphone, count: 0 },
+  { id: 'pc', label: 'PC', icon: Monitor, count: 55 },
+  { id: 'vulnerability-scanner', label: 'Vulnerability Scanner', icon: Shield, count: 0 },
+  { id: 'vpn-client', label: 'VPN Client', icon: Globe, count: 6 },
+  { id: 'vpn-gateway', label: 'VPN Gateway', icon: Router, count: 1 },
+  { id: 'wifi-ap', label: 'Wi-Fi Access Point', icon: Wifi, count: 0 },
+  { id: 'ip-camera', label: 'IP Camera', icon: Camera, count: 0 },
+  { id: 'medical-device', label: 'Medical Device', icon: Activity, count: 0 },
+  { id: 'printer', label: 'Printer', icon: Printer, count: 1 },
+  { id: 'voip-phone', label: 'VoIP Phone', icon: Phone, count: 43 },
+  { id: 'database', label: 'Database', icon: Database, count: 7 },
+  { id: 'web-server', label: 'Web Server', icon: Globe, count: 29 },
+  { id: 'load-balancer', label: 'Load Balancer', icon: Network, count: 0 },
+  { id: 'proxy-server', label: 'Web Proxy Server', icon: Globe, count: 0 },
+  { id: 'firewall', label: 'Firewall', icon: Shield, count: 0 },
+  { id: 'gateway', label: 'Gateway', icon: Router, count: 4 },
+  { id: 'custom-device', label: 'Custom Device', icon: Settings, count: 1 },
+  { id: 'nat-gateway', label: 'NAT Gateway', icon: Router, count: 4 },
+  { id: 'attack-simulator', label: 'Attack Simulator', icon: AlertTriangle, count: 0 },
+];
+
+// Protocols with server/client counts
+const protocolStats = [
+  { name: 'Database', servers: 6, clients: 11 },
+  { name: 'DHCP', servers: 9, clients: 23 },
+  { name: 'DNS', servers: 17, clients: 91 },
+  { name: 'HL7', servers: 1, clients: 2 },
+  { name: 'HTTP', servers: 32, clients: 102 },
+  { name: 'ICA', servers: 6, clients: 26 },
+  { name: 'Kerberos', servers: 3, clients: 13 },
+  { name: 'LDAP', servers: 6, clients: 29 },
+  { name: 'MSRPC', servers: 7, clients: 25 },
+  { name: 'NFS', servers: 4, clients: 4 },
+  { name: 'SMB', servers: 12, clients: 45 },
+  { name: 'SSH', servers: 8, clients: 32 },
+];
+
+// Summary stats for header
+const headerStats = [
+  { label: 'New Devices', value: 0, color: 'text-primary' },
+  { label: 'Active Devices', value: 296, color: 'text-primary' },
+  { label: 'Device Groups', value: 24, color: 'text-primary' },
+  { label: 'Files', value: 1, color: 'text-primary' },
+  { label: 'Users', value: 79, color: 'text-primary' },
+  { label: 'Networks', value: 1, color: 'text-primary' },
+  { label: 'Applications', value: 17, color: 'text-primary' },
+];
+
 export const AssetsOverviewPanel = ({ assets, onSelectAsset }: AssetsOverviewPanelProps) => {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -65,41 +132,28 @@ export const AssetsOverviewPanel = ({ assets, onSelectAsset }: AssetsOverviewPan
   const highRiskAssets = assets.filter(a => a.threatScore >= 60 && a.threatScore < 80).length;
   const mediumRiskAssets = assets.filter(a => a.threatScore >= 40 && a.threatScore < 60).length;
   const lowRiskAssets = assets.filter(a => a.threatScore < 40).length;
-  const avgThreatScore = Math.round(assets.reduce((sum, a) => sum + a.threatScore, 0) / assets.length);
-
-  // Device type distribution
-  const deviceTypes = assets.reduce((acc, asset) => {
-    acc[asset.deviceType] = (acc[asset.deviceType] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const deviceTypePieData = Object.entries(deviceTypes).map(([name, value], index) => ({
-    name,
-    value,
-    color: COLORS[index % COLORS.length],
-  }));
-
-  // Risk distribution for bar chart
-  const riskDistribution = [
-    { name: 'Critical', count: criticalAssets, color: 'hsl(var(--destructive))' },
-    { name: 'High', count: highRiskAssets, color: 'hsl(var(--threat-high))' },
-    { name: 'Medium', count: mediumRiskAssets, color: 'hsl(var(--threat-medium))' },
-    { name: 'Low', count: lowRiskAssets, color: 'hsl(var(--threat-low))' },
-  ];
 
   // Top risky assets
   const topRiskyAssets = [...assets].sort((a, b) => b.threatScore - a.threatScore).slice(0, 5);
+
+  // Traffic summary
+  const totalBytesIn = 245600000;
+  const totalBytesOut = 189400000;
+
+  const formatBytes = (bytes: number): string => {
+    if (bytes >= 1000000000) return `${(bytes / 1000000000).toFixed(1)} GB`;
+    if (bytes >= 1000000) return `${(bytes / 1000000).toFixed(1)} MB`;
+    if (bytes >= 1000) return `${(bytes / 1000).toFixed(1)} KB`;
+    return `${bytes} B`;
+  };
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-background">
       {/* Header */}
       <div className="bg-card border-b border-border px-6 py-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-semibold text-foreground">Assets Overview</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Monitor and manage all network assets in your environment
-            </p>
+            <h1 className="text-xl font-semibold text-foreground">Browse Assets</h1>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" className="gap-2">
@@ -112,21 +166,134 @@ export const AssetsOverviewPanel = ({ assets, onSelectAsset }: AssetsOverviewPan
             </Button>
           </div>
         </div>
+        
+        {/* Summary Stats Row */}
+        <div className="grid grid-cols-7 gap-3">
+          {headerStats.map((stat, index) => (
+            <Card key={index} className="bg-secondary/30 border-border/50">
+              <CardContent className="py-3 px-4">
+                <p className="text-xs text-muted-foreground">{stat.label}</p>
+                <p className={cn("text-lg font-bold font-mono", stat.color)}>
+                  {stat.value} {stat.label.toLowerCase().includes('device') && stat.value > 0 && 
+                    <span className="text-xs font-normal text-muted-foreground">
+                      {stat.label.toLowerCase().includes('new') ? 'new devices' : 
+                       stat.label.toLowerCase().includes('active') ? 'active devices' :
+                       stat.label.toLowerCase().includes('group') ? 'device groups' : ''}
+                    </span>
+                  }
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
 
       <ScrollArea className="flex-1">
         <div className="p-6 space-y-6">
-          {/* Summary Cards */}
-          <div className="grid grid-cols-5 gap-4">
+          {/* Devices by Role and Protocol */}
+          <div className="grid grid-cols-5 gap-6">
+            {/* Devices by Role */}
+            <Card className="col-span-3">
+              <CardHeader className="py-3 px-4">
+                <CardTitle className="text-sm font-medium">Devices by Role</CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-4">
+                <div className="grid grid-cols-3 gap-3">
+                  {deviceRoles.map((role) => {
+                    const IconComponent = role.icon;
+                    return (
+                      <Tooltip key={role.id}>
+                        <TooltipTrigger asChild>
+                          <div className={cn(
+                            "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                            role.count > 0 
+                              ? "bg-secondary/30 border-border hover:bg-secondary/50" 
+                              : "bg-muted/20 border-border/50 opacity-60"
+                          )}>
+                            <IconComponent className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium truncate">{role.label}</p>
+                              <p className={cn(
+                                "text-xs font-mono",
+                                role.count > 0 ? "text-primary" : "text-muted-foreground"
+                              )}>
+                                {role.count} Device{role.count !== 1 ? 's' : ''}
+                              </p>
+                            </div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">View {role.count} {role.label} device{role.count !== 1 ? 's' : ''}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Devices by Protocol */}
+            <Card className="col-span-2">
+              <CardHeader className="py-3 px-4">
+                <CardTitle className="text-sm font-medium">Devices by Protocol</CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-4">
+                <ScrollArea className="h-[400px]">
+                  <div className="space-y-2">
+                    {protocolStats.map((protocol, index) => (
+                      <Tooltip key={index}>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center justify-between p-2.5 bg-secondary/30 rounded-lg hover:bg-secondary/50 cursor-pointer transition-colors">
+                            <span className="text-sm font-medium">{protocol.name}</span>
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-1.5">
+                                <ArrowDownLeft className="h-3 w-3 text-primary" />
+                                <span className="text-xs font-mono text-primary">{protocol.servers} server{protocol.servers !== 1 ? 's' : ''}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <ArrowUpRight className="h-3 w-3 text-chart-2" />
+                                <span className="text-xs font-mono text-chart-2">{protocol.clients} client{protocol.clients !== 1 ? 's' : ''}</span>
+                              </div>
+                              <Settings className="h-3.5 w-3.5 text-muted-foreground" />
+                            </div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">Click to view {protocol.name} activity</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Traffic Overview and Risk Summary */}
+          <div className="grid grid-cols-4 gap-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg">
-                    <Monitor className="h-5 w-5 text-primary" />
+                    <ArrowDownLeft className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Assets</p>
-                    <p className="text-2xl font-bold font-mono">{assets.length}</p>
+                    <p className="text-sm text-muted-foreground">Inbound Traffic</p>
+                    <p className="text-2xl font-bold font-mono">{formatBytes(totalBytesIn)}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-chart-2/10 rounded-lg">
+                    <ArrowUpRight className="h-5 w-5 text-chart-2" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Outbound Traffic</p>
+                    <p className="text-2xl font-bold font-mono">{formatBytes(totalBytesOut)}</p>
                   </div>
                 </div>
               </CardContent>
@@ -159,150 +326,44 @@ export const AssetsOverviewPanel = ({ assets, onSelectAsset }: AssetsOverviewPan
                 </div>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-secondary rounded-lg">
-                    <Activity className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Avg Score</p>
-                    <p className="text-2xl font-bold font-mono">{avgThreatScore}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-success/20 rounded-lg">
-                    <TrendingUp className="h-5 w-5 text-success" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Low Risk</p>
-                    <p className="text-2xl font-bold font-mono">{lowRiskAssets}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
-          {/* Charts Row */}
-          <div className="grid grid-cols-3 gap-4">
-            {/* Risk Distribution */}
-            <Card>
-              <CardHeader className="py-3 px-4">
-                <CardTitle className="text-sm font-medium">Risk Distribution</CardTitle>
-              </CardHeader>
-              <CardContent className="px-4 pb-4">
-                <div className="h-48">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={riskDistribution} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-                      <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                      <YAxis dataKey="name" type="category" stroke="hsl(var(--muted-foreground))" fontSize={10} width={60} />
-                      <RechartsTooltip 
-                        contentStyle={{ 
-                          backgroundColor: 'hsl(var(--card))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px',
-                          fontSize: '12px'
-                        }}
-                      />
-                      <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-                        {riskDistribution.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Device Types */}
-            <Card>
-              <CardHeader className="py-3 px-4">
-                <CardTitle className="text-sm font-medium">Device Types</CardTitle>
-              </CardHeader>
-              <CardContent className="px-4 pb-4">
-                <div className="h-48">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={deviceTypePieData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={40}
-                        outerRadius={70}
-                        paddingAngle={2}
-                        dataKey="value"
-                      >
-                        {deviceTypePieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <RechartsTooltip 
-                        contentStyle={{ 
-                          backgroundColor: 'hsl(var(--card))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px',
-                          fontSize: '12px'
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex flex-wrap gap-2 justify-center mt-2">
-                  {deviceTypePieData.map((entry, index) => (
-                    <div key={index} className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                      <span className="text-xs text-muted-foreground">{entry.name} ({entry.value})</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Top Risky Assets */}
-            <Card>
-              <CardHeader className="py-3 px-4">
-                <CardTitle className="text-sm font-medium">Top Risky Assets</CardTitle>
-              </CardHeader>
-              <CardContent className="px-4 pb-4">
-                <div className="space-y-2">
-                  {topRiskyAssets.map((asset, index) => {
-                    const DeviceIcon = getDeviceIcon(asset.deviceType);
-                    return (
-                      <Tooltip key={asset.id}>
-                        <TooltipTrigger asChild>
-                          <div 
-                            className="flex items-center justify-between p-2 bg-secondary/30 rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors"
-                            onClick={() => onSelectAsset(asset.id)}
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-mono text-muted-foreground w-4">#{index + 1}</span>
-                              <DeviceIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                              <span className="text-xs font-medium truncate max-w-[100px]">{asset.name}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <ScoreBadge score={asset.threatScore} label="" size="sm" showLabel={false} />
-                              <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                            </div>
+          {/* Top Risky Assets */}
+          <Card>
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm font-medium">Top Risky Assets</CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4">
+              <div className="grid grid-cols-5 gap-3">
+                {topRiskyAssets.map((asset, index) => {
+                  const DeviceIcon = getDeviceIcon(asset.deviceType);
+                  return (
+                    <Tooltip key={asset.id}>
+                      <TooltipTrigger asChild>
+                        <div 
+                          className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors"
+                          onClick={() => onSelectAsset(asset.id)}
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-xs font-mono text-muted-foreground">#{index + 1}</span>
+                            <DeviceIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <span className="text-xs font-medium truncate">{asset.name}</span>
                           </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs">{asset.ip} - {asset.deviceType}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <ScoreBadge score={asset.threatScore} label="" size="sm" showLabel={false} />
+                            <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                          </div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs">{asset.ip} - {asset.deviceType}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Assets Table */}
           <Card>
