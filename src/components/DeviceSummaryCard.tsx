@@ -49,25 +49,13 @@ const InfoRow = ({ label, value, tooltip, editable }: { label: string; value: Re
   </div>
 );
 
-const IntegrationCTA = ({ title, description }: { title: string; description: string }) => (
-  <div className="bg-secondary/50 border border-dashed border-primary/30 rounded-lg p-3 space-y-2">
-    <div className="flex items-start gap-2">
-      <AlertCircle className="h-4 w-4 text-primary mt-0.5" />
-      <div className="flex-1">
-        <p className="text-xs font-medium text-foreground">{title}</p>
-        <p className="text-[10px] text-muted-foreground mt-0.5">{description}</p>
-      </div>
-    </div>
-    <div className="flex gap-2">
-      <Button variant="outline" size="sm" className="h-7 text-xs flex-1">
-        <Link2 className="h-3 w-3 mr-1" />
-        Connect Integration
-      </Button>
-      <Button variant="ghost" size="sm" className="h-7 text-xs">
-        <Plus className="h-3 w-3 mr-1" />
-        Add Manually
-      </Button>
-    </div>
+const IntegrationBanner = ({ description }: { description: string }) => (
+  <div className="flex items-center gap-2 p-2 bg-primary/5 border border-dashed border-primary/30 rounded-lg mb-2">
+    <Link2 className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+    <p className="text-[10px] text-muted-foreground flex-1">{description}</p>
+    <Button variant="outline" size="sm" className="h-6 text-[10px] px-2">
+      Connect
+    </Button>
   </div>
 );
 
@@ -90,7 +78,7 @@ export const DeviceSummaryCard = ({ asset }: DeviceSummaryCardProps) => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Server className="h-4 w-4 text-primary" />
-          <h3 className="section-title mb-0">Asset Identity</h3>
+          <h3 className="section-title mb-0">Asset Summary</h3>
         </div>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -99,17 +87,17 @@ export const DeviceSummaryCard = ({ asset }: DeviceSummaryCardProps) => {
             </button>
           </TooltipTrigger>
           <TooltipContent side="left" className="max-w-xs">
-            <p className="text-xs">Device identity from packet capture and optional NMS/IPAM integration</p>
+            <p className="text-xs">Device summary from network traffic analysis and optional integrations</p>
           </TooltipContent>
         </Tooltip>
       </div>
 
       <div className="space-y-4">
-        {/* Section 1: Packet-Captured Data (Always Available) */}
+        {/* Section 1: Network Identity */}
         <div className="space-y-0">
           <div className="flex items-center gap-2 mb-2">
             <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-success/10 text-success border-success/30">
-              From Packet Capture
+              Network Identity
             </Badge>
           </div>
           
@@ -198,113 +186,124 @@ export const DeviceSummaryCard = ({ asset }: DeviceSummaryCardProps) => {
           </div>
         </div>
 
-        {/* Section 2: Device Classification (Requires Integration or Manual Input) */}
+        {/* Section 2: Device & Infrastructure Details (from Integration) */}
         <div className="pt-3 border-t border-border">
           <div className="flex items-center gap-2 mb-2">
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary border-primary/30">
-              Device Classification
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-warning/10 text-warning border-warning/30">
+              Device & Infrastructure Details
             </Badge>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Info className="h-3 w-3 text-muted-foreground/60 cursor-help" />
               </TooltipTrigger>
               <TooltipContent side="right" className="max-w-xs">
-                <p className="text-xs">Device type and role - from OpManager Plus integration or manual entry</p>
+                <p className="text-xs">Device classification and infrastructure details - auto-populated via OpManager Plus integration or enter manually</p>
               </TooltipContent>
             </Tooltip>
           </div>
           
-          {hasDeviceTypeData || hasRoleData ? (
-            <div className="space-y-0 bg-secondary/30 rounded-lg p-2">
-              <InfoRow 
-                label="Device Type" 
-                value={asset.deviceType} 
-                tooltip="Device classification from integration or manual entry"
-                editable
-              />
-              <InfoRow 
-                label="Role" 
-                value={asset.roleTag} 
-                tooltip="Assigned role - can be updated manually"
-                editable
-              />
-              <InfoRow 
-                label="Category" 
-                value={asset.category} 
-                tooltip="Asset category for grouping"
-                editable
-              />
-            </div>
-          ) : (
-            <IntegrationCTA 
-              title="Device Classification Unavailable"
-              description="Connect OpManager Plus or enter device type/role manually to enrich this asset."
-            />
+          {/* Show integration banner if no integration data */}
+          {!hasDeviceTypeData && !hasRoleData && !hasNMSIntegration && !hasWirelessIntegration && (
+            <IntegrationBanner description="Connect OpManager Plus to auto-populate device and infrastructure details" />
           )}
-        </div>
 
-        {/* Section 3: Network Infrastructure (Requires NMS/IPAM Integration) */}
-        <div className="pt-3 border-t border-border">
-          <div className="flex items-center gap-2 mb-2">
-            {asset.connectionType === 'wireless' ? (
-              <Wifi className="h-3.5 w-3.5 text-primary" />
-            ) : (
-              <Cable className="h-3.5 w-3.5 text-primary" />
-            )}
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-warning/10 text-warning border-warning/30">
-              From OpManager Plus / OpUtils
-            </Badge>
+          {/* Device Classification - always show fields */}
+          <div className="space-y-0 bg-secondary/30 rounded-lg p-2 mb-2">
+            <p className="text-[10px] text-muted-foreground mb-1.5 font-medium">Classification</p>
+            <InfoRow 
+              label="Device Type" 
+              value={hasDeviceTypeData ? asset.deviceType : <span className="text-muted-foreground/50 italic">Not specified</span>} 
+              tooltip="Device classification - auto-populated via integration or enter manually"
+              editable
+            />
+            <InfoRow 
+              label="Role" 
+              value={hasRoleData ? asset.roleTag : <span className="text-muted-foreground/50 italic">Not specified</span>} 
+              tooltip="Assigned role - auto-populated via integration or enter manually"
+              editable
+            />
+            <InfoRow 
+              label="Category" 
+              value={asset.category || <span className="text-muted-foreground/50 italic">Not specified</span>} 
+              tooltip="Asset category for grouping"
+              editable
+            />
           </div>
 
-          {/* Wired Connection Details */}
-          {asset.connectionType === 'wired' && hasNMSIntegration && (
-            <div className="space-y-0 bg-secondary/30 rounded-lg p-2">
-              {asset.connectedSwitch && (
-                <InfoRow label="Switch" value={asset.connectedSwitch} tooltip="Connected switch from NMS discovery" />
-              )}
-              {asset.switchPort && (
-                <InfoRow label="Port" value={asset.switchPort} tooltip="Switch port from SNMP polling" />
-              )}
-              {asset.vlan && (
-                <InfoRow label="VLAN" value={asset.vlan} tooltip="VLAN assignment from switch" />
-              )}
-              {asset.subnet && (
-                <InfoRow label="Subnet" value={asset.subnet} tooltip="IP subnet from IPAM" />
-              )}
-              {asset.gateway && (
-                <InfoRow label="Gateway" value={asset.gateway} tooltip="Default gateway" />
-              )}
+          {/* Infrastructure - Wired */}
+          {asset.connectionType === 'wired' && (
+            <div className="space-y-0 bg-secondary/30 rounded-lg p-2 mb-2">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <Cable className="h-3 w-3 text-muted-foreground" />
+                <p className="text-[10px] text-muted-foreground font-medium">Wired Connection</p>
+              </div>
+              <InfoRow 
+                label="Switch" 
+                value={hasNMSIntegration && asset.connectedSwitch ? asset.connectedSwitch : <span className="text-muted-foreground/50 italic">Not specified</span>} 
+                tooltip="Connected switch - auto-populated via integration or enter manually"
+                editable
+              />
+              <InfoRow 
+                label="Port" 
+                value={hasNMSIntegration && asset.switchPort ? asset.switchPort : <span className="text-muted-foreground/50 italic">Not specified</span>} 
+                tooltip="Switch port - auto-populated via integration or enter manually"
+                editable
+              />
+              <InfoRow 
+                label="VLAN" 
+                value={asset.vlan || <span className="text-muted-foreground/50 italic">Not specified</span>} 
+                tooltip="VLAN assignment"
+                editable
+              />
+              <InfoRow 
+                label="Subnet" 
+                value={asset.subnet || <span className="text-muted-foreground/50 italic">Not specified</span>} 
+                tooltip="IP subnet"
+                editable
+              />
+              <InfoRow 
+                label="Gateway" 
+                value={asset.gateway || <span className="text-muted-foreground/50 italic">Not specified</span>} 
+                tooltip="Default gateway"
+                editable
+              />
             </div>
           )}
 
-          {/* Wireless Connection Details */}
-          {asset.connectionType === 'wireless' && hasWirelessIntegration && (
-            <div className="space-y-0 bg-secondary/30 rounded-lg p-2">
-              {asset.ssid && (
-                <InfoRow label="SSID" value={asset.ssid} tooltip="Wireless network name" />
-              )}
-              {asset.accessPoint && (
-                <InfoRow 
-                  label="Access Point" 
-                  value={
-                    <div className="text-right">
-                      <div>{asset.accessPoint}</div>
-                      {asset.accessPointMac && (
-                        <div className="text-[10px] font-mono text-muted-foreground">{asset.accessPointMac}</div>
-                      )}
-                    </div>
-                  } 
-                  tooltip="Connected access point name and MAC address" 
-                />
-              )}
-              {asset.frequency && (
+          {/* Infrastructure - Wireless */}
+          {asset.connectionType === 'wireless' && (
+            <div className="space-y-0 bg-secondary/30 rounded-lg p-2 mb-2">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <Wifi className="h-3 w-3 text-muted-foreground" />
+                <p className="text-[10px] text-muted-foreground font-medium">Wireless Connection</p>
+              </div>
+              <InfoRow 
+                label="SSID" 
+                value={hasWirelessIntegration && asset.ssid ? asset.ssid : <span className="text-muted-foreground/50 italic">Not specified</span>} 
+                tooltip="Wireless network name - auto-populated via integration or enter manually"
+                editable
+              />
+              <InfoRow 
+                label="Access Point" 
+                value={hasWirelessIntegration && asset.accessPoint ? (
+                  <div className="text-right">
+                    <div>{asset.accessPoint}</div>
+                    {asset.accessPointMac && (
+                      <div className="text-[10px] font-mono text-muted-foreground">{asset.accessPointMac}</div>
+                    )}
+                  </div>
+                ) : <span className="text-muted-foreground/50 italic">Not specified</span>} 
+                tooltip="Connected access point - auto-populated via integration or enter manually"
+                editable
+              />
+              {hasWirelessIntegration && asset.frequency && (
                 <InfoRow 
                   label="Frequency" 
                   value={`${asset.frequency} (Ch ${asset.channel})`} 
                   tooltip="Wireless frequency band and channel" 
                 />
               )}
-              {asset.signalStrength !== undefined && (
+              {hasWirelessIntegration && asset.signalStrength !== undefined && (
                 <InfoRow 
                   label="Signal" 
                   value={
@@ -331,7 +330,7 @@ export const DeviceSummaryCard = ({ asset }: DeviceSummaryCardProps) => {
                   tooltip={`Signal strength: ${asset.signalStrength} dBm${asset.snr ? `, SNR: ${asset.snr} dB` : ''}`} 
                 />
               )}
-              {asset.authMethod && (
+              {hasWirelessIntegration && asset.authMethod && (
                 <InfoRow 
                   label="Security" 
                   value={
@@ -342,30 +341,25 @@ export const DeviceSummaryCard = ({ asset }: DeviceSummaryCardProps) => {
                   tooltip={`Authentication: ${asset.authMethod}${asset.encryptionType ? `, Encryption: ${asset.encryptionType}` : ''}`} 
                 />
               )}
-              {asset.vlan && (
-                <InfoRow label="VLAN" value={asset.vlan} tooltip="VLAN assignment" />
-              )}
-              {asset.subnet && (
-                <InfoRow label="Subnet" value={asset.subnet} tooltip="IP subnet from IPAM" />
-              )}
-              {asset.gateway && (
-                <InfoRow label="Gateway" value={asset.gateway} tooltip="Default gateway" />
-              )}
+              <InfoRow 
+                label="VLAN" 
+                value={asset.vlan || <span className="text-muted-foreground/50 italic">Not specified</span>} 
+                tooltip="VLAN assignment"
+                editable
+              />
+              <InfoRow 
+                label="Subnet" 
+                value={asset.subnet || <span className="text-muted-foreground/50 italic">Not specified</span>} 
+                tooltip="IP subnet"
+                editable
+              />
+              <InfoRow 
+                label="Gateway" 
+                value={asset.gateway || <span className="text-muted-foreground/50 italic">Not specified</span>} 
+                tooltip="Default gateway"
+                editable
+              />
             </div>
-          )}
-
-          {/* No Integration CTA */}
-          {!hasNMSIntegration && asset.connectionType !== 'wireless' && (
-            <IntegrationCTA 
-              title="Network Infrastructure Details Unavailable"
-              description="Connect OpManager Plus or OpUtils to see switch port, VLAN, and other infrastructure details."
-            />
-          )}
-          {!hasWirelessIntegration && asset.connectionType === 'wireless' && (
-            <IntegrationCTA 
-              title="Wireless Details Unavailable"
-              description="Connect OpManager Plus to see access point, SSID, and signal strength details."
-            />
           )}
         </div>
 
