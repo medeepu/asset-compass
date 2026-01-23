@@ -31,6 +31,12 @@ export const mockAssets: Asset[] = [
     gateway: '207.83.187.1',
     // Tags
     tags: ['Critical Asset', 'PCI-DSS', 'Production'],
+    userLogins: [
+      { id: '1', username: 'jmitchell', domain: 'CORP', authType: 'Kerberos', lastSeen: '2022-01-21 18:45:00', firstSeen: '2022-01-10 09:00:00', loginCount: 156 },
+      { id: '2', username: 'svc_backup', domain: 'CORP', authType: 'Kerberos', lastSeen: '2022-01-21 03:00:00', firstSeen: '2022-01-01 03:00:00', loginCount: 42 },
+      { id: '3', username: 'admin', domain: 'LOCAL', authType: 'NTLM', lastSeen: '2022-01-20 14:30:00', firstSeen: '2022-01-15 10:00:00', loginCount: 12 },
+      { id: '4', username: 'schen', domain: 'CORP', authType: 'Kerberos', lastSeen: '2022-01-19 16:20:00', firstSeen: '2022-01-18 09:15:00', loginCount: 8 },
+    ],
     comments: [
       { id: '1', author: 'John Mitchell', content: 'Primary domain controller for east campus', timestamp: '2022-01-20 10:30:00' },
       { id: '2', author: 'Sarah Chen', content: 'Reviewed traffic anomaly - confirmed legitimate backup job', timestamp: '2022-01-21 14:15:00' },
@@ -81,6 +87,9 @@ export const mockAssets: Asset[] = [
     vlan: 'VLAN 1 (Management)',
     subnet: '192.168.1.0/24',
     tags: ['Network Core', 'Critical'],
+    userLogins: [
+      { id: '1', username: 'netadmin', domain: 'CORP', authType: 'RADIUS', lastSeen: '2022-01-21 17:00:00', firstSeen: '2021-11-15 10:00:00', loginCount: 342 },
+    ],
     ipHistory: [{ value: '192.168.1.100', timestamp: '2021-11-15', isCurrent: true }],
     hostnameHistory: [{ value: 'catalyst-9000', timestamp: '2021-11-15', isCurrent: true }],
     macHistory: [{ value: '00:2B:3C:4D:5E:6F', timestamp: '2021-11-15', isCurrent: true }],

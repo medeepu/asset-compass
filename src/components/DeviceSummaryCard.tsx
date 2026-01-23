@@ -1,7 +1,7 @@
 import { Asset } from "@/types/asset";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Info, Server, MapPin, Clock, Wifi, Cable, Link2, Edit3, Plus, AlertCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, Info, Server, MapPin, Clock, Wifi, Cable, Link2, Edit3, User, Users } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -363,7 +363,69 @@ export const DeviceSummaryCard = ({ asset }: DeviceSummaryCardProps) => {
           )}
         </div>
 
-        {/* Section 4: Location (Integration or Manual) */}
+        {/* Section 4: Users (from Identity protocols - Kerberos, NTLM, LDAP, RADIUS) */}
+        <div className="pt-3 border-t border-border">
+          <div className="flex items-center gap-2 mb-2">
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary border-primary/30">
+              <Users className="h-3 w-3 mr-1" />
+              Users
+            </Badge>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3 w-3 text-muted-foreground/60 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent side="right" className="max-w-xs">
+                <p className="text-xs">User accounts seen authenticating from this device via Kerberos, NTLM, LDAP, or RADIUS protocols</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          
+          {asset.userLogins && asset.userLogins.length > 0 ? (
+            <div className="space-y-1.5">
+              {asset.userLogins.slice(0, 4).map((login) => (
+                <div key={login.id} className="flex items-center justify-between p-2 bg-secondary/30 rounded-lg group hover:bg-secondary/50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                      <User className="h-3 w-3 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium">
+                        {login.domain ? `${login.domain}\\${login.username}` : login.username}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">
+                        Last: {login.lastSeen.split(' ')[0]}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 cursor-help">
+                          {login.authType}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent side="left">
+                        <p className="text-xs">{login.loginCount} logins since {login.firstSeen.split(' ')[0]}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </div>
+              ))}
+              {asset.userLogins.length > 4 && (
+                <button className="w-full text-xs text-primary hover:underline py-1">
+                  +{asset.userLogins.length - 4} more users
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="p-3 bg-secondary/30 rounded-lg text-center">
+              <p className="text-xs text-muted-foreground italic">No user logins detected</p>
+              <p className="text-[10px] text-muted-foreground/60 mt-1">User logins are captured from Kerberos, NTLM, LDAP, RADIUS traffic</p>
+            </div>
+          )}
+        </div>
+
+        {/* Section 5: Location (Integration or Manual) */}
         <div className="pt-3 border-t border-border">
           <div className="flex items-center gap-2 p-2 bg-secondary/30 rounded-lg">
             <MapPin className="h-3.5 w-3.5 text-muted-foreground" />

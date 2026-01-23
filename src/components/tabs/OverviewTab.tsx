@@ -8,6 +8,7 @@ import { ScoreCards } from "../ScoreCards";
 import { ChangeHistoryCard } from "../ChangeHistoryCard";
 import { PeerMapCard } from "../PeerMapCard";
 import { FlowsTable } from "../FlowsTable";
+import { TrafficCard } from "../TrafficCard";
 
 interface OverviewTabProps {
   asset: Asset;
@@ -33,21 +34,28 @@ export const OverviewTab = ({
   conversations,
 }: OverviewTabProps) => {
   return (
-    <div className="space-y-6">
-      {/* Row 1: Asset Identity, Network Behavior, Risk Scores */}
+    <div className="space-y-4">
+      {/* Row 1: Asset Summary (taller) + Right Column (Risk + Detection stacked) */}
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-4">
           <DeviceSummaryCard asset={asset} />
         </div>
-        <div className="col-span-4">
-          <ScoreCards asset={asset} />
-        </div>
-        <div className="col-span-4">
-          <DetectionAlertsCard anomalies={anomalies} />
+        <div className="col-span-8">
+          <div className="grid grid-cols-2 gap-4 h-full">
+            {/* Left sub-column: Risk + Traffic */}
+            <div className="flex flex-col gap-4">
+              <ScoreCards asset={asset} />
+              <TrafficCard inbound={2450} outbound={1230} />
+            </div>
+            {/* Right sub-column: Detection Alerts */}
+            <div className="h-full">
+              <DetectionAlertsCard anomalies={anomalies} />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Row 2: Peer Context, Application Highlights, MITRE Summary */}
+      {/* Row 2: Peer Context, Application Highlights, MITRE + Change History */}
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-4">
           <PeerSummaryCard peers={peers} />
@@ -56,7 +64,7 @@ export const OverviewTab = ({
           <ApplicationHighlightsCard applications={applications} conversations={conversations} />
         </div>
         <div className="col-span-4">
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4 h-full">
             <MitreSummaryCard categories={mitreCategories} totalEvents={27} />
             <ChangeHistoryCard changes={changeHistory} />
           </div>
