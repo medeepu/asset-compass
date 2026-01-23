@@ -44,6 +44,8 @@ export interface Asset {
   // Tags and Comments
   tags?: string[];
   comments?: AssetComment[];
+  // User logins seen from this device
+  userLogins?: UserLogin[];
 }
 
 export interface AssetComment {
@@ -51,6 +53,16 @@ export interface AssetComment {
   author: string;
   content: string;
   timestamp: string;
+}
+
+export interface UserLogin {
+  id: string;
+  username: string;
+  domain?: string;
+  authType: 'Kerberos' | 'NTLM' | 'LDAP' | 'RADIUS' | 'Other';
+  lastSeen: string;
+  firstSeen: string;
+  loginCount: number;
 }
 
 export interface HistoryItem {
