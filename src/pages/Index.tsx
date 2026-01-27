@@ -69,22 +69,11 @@ const Index = () => {
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden">
           {activeMainTab === 'overview' ? (
-            <>
-              {/* Left Panel - Asset List */}
-              <div className="w-80 flex-shrink-0 border-r border-border">
-                <AssetListPanel
-                  assets={mockAssets}
-                  selectedAssetId={selectedAssetId}
-                  onSelectAsset={handleSelectAsset}
-                />
-              </div>
-
-              {/* Right Panel - Assets Overview */}
-              <AssetsOverviewPanel 
-                assets={mockAssets} 
-                onSelectAsset={handleSelectAsset}
-              />
-            </>
+            /* Full Width Assets Overview - No Left Panel */
+            <AssetsOverviewPanel 
+              assets={mockAssets} 
+              onSelectAsset={handleSelectAsset}
+            />
           ) : (
             <>
               {/* Left Panel - Asset List */}
