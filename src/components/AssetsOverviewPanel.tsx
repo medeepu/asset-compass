@@ -37,8 +37,8 @@ import {
   ArrowDownLeft,
   ArrowUpRight
 } from "lucide-react";
-import { useState } from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { useState, useMemo } from "react";
+import { X } from "lucide-react";
 
 interface AssetsOverviewPanelProps {
   assets: Asset[];
@@ -121,20 +121,103 @@ const headerStats = [
 
 export const AssetsOverviewPanel = ({ assets, onSelectAsset }: AssetsOverviewPanelProps) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeRoleFilter, setActiveRoleFilter] = useState<string | null>(null);
+  const [activeProtocolFilter, setActiveProtocolFilter] = useState<string | null>(null);
 
-  const filteredAssets = assets.filter(asset =>
-    asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    asset.ip.includes(searchQuery)
-  );
+  // Map role IDs to asset properties
+  const roleToAssetMapping: Record<string, string[]> = {
+    'domain-controller': ['Domain Controller'],
+    'file-server': ['File Server'],
+    'mobile-device': ['Mobile'],
+    'pc': ['Workstation', 'Laptop'],
+    'vulnerability-scanner': ['Scanner'],
+    'vpn-client': ['VPN Client'],
+    'vpn-gateway': ['VPN Gateway'],
+    'wifi-ap': ['Access Point'],
+    'ip-camera': ['Camera'],
+    'medical-device': ['Medical'],
+    'printer': ['Printer'],
+    'voip-phone': ['VoIP Phone'],
+    'database': ['Database'],
+    'web-server': ['Web Server'],
+    'load-balancer': ['Load Balancer'],
+    'proxy-server': ['Proxy'],
+    'firewall': ['Firewall'],
+    'gateway': ['Gateway'],
+    'custom-device': ['Custom'],
+    'nat-gateway': ['NAT Gateway'],
+    'attack-simulator': ['Attack Simulator'],
+  };
+
+  // Filter assets based on active filters
+  const filteredAssets = useMemo(() => {
+    let result = assets;
+    
+    // Apply search filter
+    if (searchQuery) {
+      result = result.filter(asset =>
+        asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        asset.ip.includes(searchQuery)
+      );
+    }
+    
+    // Apply role filter
+    if (activeRoleFilter) {
+      const matchingTypes = roleToAssetMapping[activeRoleFilter] || [];
+      result = result.filter(asset => 
+        matchingTypes.some(type => 
+          asset.deviceType.toLowerCase().includes(type.toLowerCase()) ||
+          asset.roleTag.toLowerCase().includes(type.toLowerCase())
+        )
+      );
+    }
+    
+    // Apply protocol filter (simulated - in real app would check actual protocol usage)
+    if (activeProtocolFilter) {
+      // For demo, filter based on device characteristics
+      result = result.filter(asset => {
+        const protocolLower = activeProtocolFilter.toLowerCase();
+        if (protocolLower === 'http') return asset.deviceType.includes('Server') || asset.roleTag.includes('Web');
+        if (protocolLower === 'dns') return true; // All devices use DNS
+        if (protocolLower === 'smb') return asset.deviceType === 'Server' || asset.deviceType === 'Workstation';
+        if (protocolLower === 'ssh') return asset.deviceType === 'Server';
+        if (protocolLower === 'database') return asset.roleTag.includes('Database');
+        if (protocolLower === 'ldap' || protocolLower === 'kerberos') return asset.deviceType === 'Server';
+        return true;
+      });
+    }
+    
+    return result;
+  }, [assets, searchQuery, activeRoleFilter, activeProtocolFilter]);
+
+  const handleRoleClick = (roleId: string, count: number) => {
+    if (count === 0) return;
+    setActiveRoleFilter(prev => prev === roleId ? null : roleId);
+    setActiveProtocolFilter(null); // Clear other filter
+  };
+
+  const handleProtocolClick = (protocolName: string) => {
+    setActiveProtocolFilter(prev => prev === protocolName ? null : protocolName);
+    setActiveRoleFilter(null); // Clear other filter
+  };
+
+  const clearFilters = () => {
+    setActiveRoleFilter(null);
+    setActiveProtocolFilter(null);
+    setSearchQuery('');
+  };
+
+  const hasActiveFilter = activeRoleFilter || activeProtocolFilter;
+  const activeFilterLabel = activeRoleFilter 
+    ? deviceRoles.find(r => r.id === activeRoleFilter)?.label 
+    : activeProtocolFilter;
 
   // Calculate summary stats
   const criticalAssets = assets.filter(a => a.threatScore >= 80).length;
   const highRiskAssets = assets.filter(a => a.threatScore >= 60 && a.threatScore < 80).length;
-  const mediumRiskAssets = assets.filter(a => a.threatScore >= 40 && a.threatScore < 60).length;
-  const lowRiskAssets = assets.filter(a => a.threatScore < 40).length;
 
-  // Top risky assets
-  const topRiskyAssets = [...assets].sort((a, b) => b.threatScore - a.threatScore).slice(0, 5);
+  // Top risky assets from filtered list
+  const topRiskyAssets = [...filteredAssets].sort((a, b) => b.threatScore - a.threatScore).slice(0, 5);
 
   // Traffic summary
   const totalBytesIn = 245600000;
@@ -188,21 +271,33 @@ export const AssetsOverviewPanel = ({ assets, onSelectAsset }: AssetsOverviewPan
               <div className="grid grid-cols-3 gap-2">
                 {deviceRoles.map((role) => {
                   const IconComponent = role.icon;
+                  const isActive = activeRoleFilter === role.id;
                   return (
                     <Tooltip key={role.id}>
                       <TooltipTrigger asChild>
-                        <div className={cn(
-                          "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors h-[60px]",
-                          role.count > 0 
-                            ? "bg-secondary/30 border-border hover:bg-secondary/50" 
-                            : "bg-muted/10 border-border/30 opacity-50"
-                        )}>
-                          <IconComponent className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                        <div 
+                          className={cn(
+                            "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all h-[60px]",
+                            role.count === 0 
+                              ? "bg-muted/10 border-border/30 opacity-50 cursor-not-allowed" 
+                              : isActive
+                                ? "bg-primary/10 border-primary ring-1 ring-primary"
+                                : "bg-secondary/30 border-border hover:bg-secondary/50 hover:border-primary/50"
+                          )}
+                          onClick={() => handleRoleClick(role.id, role.count)}
+                        >
+                          <IconComponent className={cn(
+                            "h-5 w-5 flex-shrink-0",
+                            isActive ? "text-primary" : "text-muted-foreground"
+                          )} />
                           <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium truncate leading-tight">{role.label}</p>
+                            <p className={cn(
+                              "text-sm font-medium truncate leading-tight",
+                              isActive && "text-primary"
+                            )}>{role.label}</p>
                             <p className={cn(
                               "text-xs font-mono leading-tight",
-                              role.count > 0 ? "text-primary" : "text-muted-foreground"
+                              role.count > 0 ? (isActive ? "text-primary" : "text-primary") : "text-muted-foreground"
                             )}>
                               {role.count} Device{role.count !== 1 ? 's' : ''}
                             </p>
@@ -210,7 +305,12 @@ export const AssetsOverviewPanel = ({ assets, onSelectAsset }: AssetsOverviewPan
                         </div>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p className="text-xs">View {role.count} {role.label} device{role.count !== 1 ? 's' : ''}</p>
+                        <p className="text-xs">
+                          {role.count > 0 
+                            ? `Click to filter ${role.count} ${role.label} device${role.count !== 1 ? 's' : ''}`
+                            : `No ${role.label} devices`
+                          }
+                        </p>
                       </TooltipContent>
                     </Tooltip>
                   );
@@ -224,23 +324,37 @@ export const AssetsOverviewPanel = ({ assets, onSelectAsset }: AssetsOverviewPan
               <div className="bg-secondary/20 rounded-lg border border-border/50 overflow-hidden">
                 <ScrollArea className="h-[460px]">
                   <div className="divide-y divide-border/30">
-                    {protocolStats.map((protocol, index) => (
-                      <Tooltip key={index}>
-                        <TooltipTrigger asChild>
-                          <div className="flex items-center justify-between px-4 py-3 hover:bg-secondary/30 cursor-pointer transition-colors">
-                            <span className="text-sm font-medium text-foreground">{protocol.name}</span>
-                            <div className="flex items-center gap-6">
-                              <span className="text-xs font-mono text-primary w-20 text-right">{protocol.servers} server{protocol.servers !== 1 ? 's' : ''}</span>
-                              <span className="text-xs font-mono text-chart-2 w-20 text-right">{protocol.clients} client{protocol.clients !== 1 ? 's' : ''}</span>
-                              <Settings className="h-4 w-4 text-muted-foreground" />
+                    {protocolStats.map((protocol, index) => {
+                      const isActive = activeProtocolFilter === protocol.name;
+                      return (
+                        <Tooltip key={index}>
+                          <TooltipTrigger asChild>
+                            <div 
+                              className={cn(
+                                "flex items-center justify-between px-4 py-3 cursor-pointer transition-all",
+                                isActive
+                                  ? "bg-primary/10 border-l-2 border-l-primary"
+                                  : "hover:bg-secondary/30 border-l-2 border-l-transparent"
+                              )}
+                              onClick={() => handleProtocolClick(protocol.name)}
+                            >
+                              <span className={cn(
+                                "text-sm font-medium",
+                                isActive ? "text-primary" : "text-foreground"
+                              )}>{protocol.name}</span>
+                              <div className="flex items-center gap-6">
+                                <span className="text-xs font-mono text-primary w-20 text-right">{protocol.servers} server{protocol.servers !== 1 ? 's' : ''}</span>
+                                <span className="text-xs font-mono text-chart-2 w-20 text-right">{protocol.clients} client{protocol.clients !== 1 ? 's' : ''}</span>
+                                <Settings className="h-4 w-4 text-muted-foreground" />
+                              </div>
                             </div>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs">Click to view {protocol.name} activity</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    ))}
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">Click to filter devices using {protocol.name}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      );
+                    })}
                   </div>
                 </ScrollArea>
               </div>
@@ -326,15 +440,44 @@ export const AssetsOverviewPanel = ({ assets, onSelectAsset }: AssetsOverviewPan
           {/* Assets Table */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-medium text-foreground">All Assets</h2>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Search assets..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-8 w-64 text-sm bg-secondary/30 border-border/50"
-                />
+              <div className="flex items-center gap-3">
+                <h2 className="text-sm font-medium text-foreground">
+                  {hasActiveFilter ? 'Filtered Assets' : 'All Assets'}
+                </h2>
+                {hasActiveFilter && (
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="gap-1.5 pr-1">
+                      <span className="text-xs">{activeFilterLabel}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-4 w-4 p-0 hover:bg-transparent"
+                        onClick={clearFilters}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {filteredAssets.length} device{filteredAssets.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {hasActiveFilter && (
+                  <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs h-8">
+                    Clear Filter
+                  </Button>
+                )}
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    placeholder="Search assets..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 h-8 w-64 text-sm bg-secondary/30 border-border/50"
+                  />
+                </div>
               </div>
             </div>
             <div className="rounded-lg border border-border/50 overflow-hidden bg-secondary/20">
